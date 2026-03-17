@@ -1,5 +1,12 @@
 # sukiro
 
+<p align="left">
+  <img alt="Support Ukraine" src="https://img.shields.io/badge/Support-Ukraine-FFC93C?style=flat-square&labelColor=07689F">
+  <img alt="Rust" src="https://img.shields.io/badge/Rust-stable-black?style=flat-square&logo=rust&logoColor=white&color=B7410E">
+  <img alt="License" src="https://img.shields.io/github/license/pivoshenko/sukiro?style=flat-square&logo=opensourceinitiative&logoColor=white&color=0A6847">
+  <img alt="Release" src="https://img.shields.io/github/v/release/pivoshenko/sukiro?style=flat-square&logo=github&logoColor=white&color=4856CD&label=Release">
+</p>
+
 Fast binary CLI to sync AI skills from local paths and GitHub repositories.
 
 ## Why
