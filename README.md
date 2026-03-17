@@ -21,9 +21,32 @@ go build -o sukiro ./cmd/sukiro
 ## Usage
 
 ```bash
-./sukiro --config skills.config.yaml
-./sukiro --config skills.config.yaml --dry-run
-./sukiro --config skills.config.yaml --json
+./sukiro sync --config skills.config.yaml
+./sukiro sync --config skills.config.yaml --dry-run
+./sukiro sync --config skills.config.yaml --json
+```
+
+## Session-start hooks (Claude/Cursor)
+
+Install auto-sync hooks:
+
+```bash
+./sukiro install-hooks --config skills.config.yaml
+```
+
+This installs:
+- `~/.sukiro/hooks/session-start.sh` (runner with lock + timeout + cache TTL)
+- `~/.claude/hooks/session-start.sh`
+- `~/.cursor/hooks/session-start.sh`
+
+Defaults:
+- timeout: 10s
+- cache TTL: 300s
+
+Override:
+
+```bash
+./sukiro install-hooks --config skills.config.yaml --timeout-seconds 15 --cache-ttl-seconds 120
 ```
 
 ## Config

@@ -6,25 +6,50 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/pivoshenko/sukiro/internal/config"
+	"github.com/pivoshenko/sukiro/internal/hooks"
 	"github.com/pivoshenko/sukiro/internal/report"
 	"github.com/pivoshenko/sukiro/internal/state"
 	"github.com/pivoshenko/sukiro/internal/syncer"
 )
 
 func main() {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		runSync(nil)
+		return
+	}
+
+	switch args[0] {
+	case "sync":
+		runSync(args[1:])
+	case "install-hooks":
+		runInstallHooks(args[1:])
+	default:
+		if strings.HasPrefix(args[0], "-") {
+			runSync(args)
+			return
+		}
+		fmt.Fprintf(os.Stderr, "sukiro: unknown command %q\n", args[0])
+		os.Exit(2)
+	}
+}
+
+func runSync(args []string) {
+	fs := flag.NewFlagSet("sync", flag.ExitOnError)
 	var cfgPath string
 	var dryRun bool
 	var quiet bool
 	var jsonOut bool
 
-	flag.StringVar(&cfgPath, "config", "skills.config.yaml", "Path to skills config")
-	flag.BoolVar(&dryRun, "dry-run", false, "Resolve and compare without writing")
-	flag.BoolVar(&quiet, "quiet", false, "Quiet output")
-	flag.BoolVar(&jsonOut, "json", false, "Print JSON summary")
-	flag.Parse()
+	fs.StringVar(&cfgPath, "config", "skills.config.yaml", "Path to skills config")
+	fs.BoolVar(&dryRun, "dry-run", false, "Resolve and compare without writing")
+	fs.BoolVar(&quiet, "quiet", false, "Quiet output")
+	fs.BoolVar(&jsonOut, "json", false, "Print JSON summary")
+	_ = fs.Parse(args)
 
 	absCfg, _ := filepath.Abs(cfgPath)
 	cfg, err := config.Load(absCfg)
@@ -71,6 +96,33 @@ func main() {
 
 	if res.Summary.Failed > 0 {
 		os.Exit(1)
+	}
+}
+
+func runInstallHooks(args []string) {
+	fs := flag.NewFlagSet("install-hooks", flag.ExitOnError)
+	var cfgPath string
+	var timeoutSec int
+	var ttlSec int
+
+	fs.StringVar(&cfgPath, "config", "skills.config.yaml", "Path to skills config")
+	fs.IntVar(&timeoutSec, "timeout-seconds", 10, "Sync timeout for hook runs")
+	fs.IntVar(&ttlSec, "cache-ttl-seconds", 300, "Skip sync if last run is newer than TTL")
+	_ = fs.Parse(args)
+
+	absCfg, _ := filepath.Abs(cfgPath)
+	if _, err := os.Stat(absCfg); err != nil {
+		exitErr(fmt.Errorf("config not found: %s", absCfg))
+	}
+
+	paths, err := hooks.Install(hooks.Params{ConfigPath: absCfg, TimeoutSeconds: timeoutSec, CacheTTLSeconds: ttlSec})
+	if err != nil {
+		exitErr(err)
+	}
+
+	fmt.Println("Installed hooks:")
+	for _, p := range paths {
+		fmt.Printf("- %s\n", p)
 	}
 }
 
