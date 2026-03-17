@@ -14,8 +14,17 @@ Fast binary CLI to sync AI skills from local paths and GitHub repositories.
 
 ## Install
 
+### From source
+
 ```bash
 go build -o sukiro ./cmd/sukiro
+```
+
+### Homebrew (tap)
+
+```bash
+brew tap pivoshenko/sukiro
+brew install sukiro
 ```
 
 ## Usage
@@ -69,7 +78,12 @@ skills:
 - State: `~/.ai/bootstrap/state.json`
 - Run reports: `~/.ai/bootstrap/runs/run-<timestamp>/report.json`
 
+## CI/CD
+
+- PR and main branch: format/vet/test/build checks
+- Tag push (`v*`): cross-platform binaries + checksums + GitHub Release
+
 ## MVP notes
 
 Current MVP focuses on `sync` behavior parity and performance-oriented implementation.
-Additional commands (`list`, `doctor`, `prune`) are planned.
+Additional commands (`list`, `doctor`, `prune`, `tui`) are planned.
