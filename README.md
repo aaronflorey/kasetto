@@ -11,7 +11,7 @@
   <img alt="Release" src="https://img.shields.io/github/v/release/pivoshenko/sukiro?style=flat-square&logo=github&logoColor=white&color=4856CD&label=Release">
 </p>
 
-Fast binary CLI to sync AI skills from local paths and GitHub repositories.
+An extremely fast AI skills and workflow manager, written in Rust.
 
 ## Why
 
