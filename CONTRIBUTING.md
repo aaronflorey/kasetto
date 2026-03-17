@@ -5,23 +5,20 @@ Thanks for contributing.
 ## Development setup
 
 ```bash
-go version
-# expected: go 1.22+
+rustc --version
+cargo --version
 
-go mod tidy
-go build ./...
-go test ./...
+cargo fmt
+cargo clippy -- -D warnings
+cargo test
+cargo build --release
 ```
 
 ## Project structure
 
-- `cmd/sukiro`: CLI entrypoint
-- `internal/config`: config parsing
-- `internal/source`: local/GitHub source resolution
-- `internal/syncer`: core sync engine
-- `internal/state`: persistent state
-- `internal/report`: run reports
-- `internal/hooks`: Claude/Cursor hook installer
+- `src/main.rs`: CLI entrypoint + core MVP logic
+- `Formula/sukiro.rb`: Homebrew formula
+- `site/`: project landing page
 
 ## Commit style
 

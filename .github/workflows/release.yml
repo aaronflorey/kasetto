@@ -13,18 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
+      - uses: dtolnay/rust-toolchain@stable
 
       - name: Build binaries
         run: |
           mkdir -p dist
-          GOOS=linux GOARCH=amd64 go build -o dist/sukiro-linux-amd64 ./cmd/sukiro
-          GOOS=linux GOARCH=arm64 go build -o dist/sukiro-linux-arm64 ./cmd/sukiro
-          GOOS=darwin GOARCH=amd64 go build -o dist/sukiro-darwin-amd64 ./cmd/sukiro
-          GOOS=darwin GOARCH=arm64 go build -o dist/sukiro-darwin-arm64 ./cmd/sukiro
+          rustup target add x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu x86_64-apple-darwin aarch64-apple-darwin
+          cargo build --release --target x86_64-unknown-linux-gnu
+          cargo build --release --target aarch64-unknown-linux-gnu
+          cargo build --release --target x86_64-apple-darwin
+          cargo build --release --target aarch64-apple-darwin
+          cp target/x86_64-unknown-linux-gnu/release/sukiro dist/sukiro-linux-amd64
+          cp target/aarch64-unknown-linux-gnu/release/sukiro dist/sukiro-linux-arm64
+          cp target/x86_64-apple-darwin/release/sukiro dist/sukiro-darwin-amd64
+          cp target/aarch64-apple-darwin/release/sukiro dist/sukiro-darwin-arm64
 
       - name: Checksums
         run: |

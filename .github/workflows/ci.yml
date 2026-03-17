@@ -8,21 +8,15 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ["1.22.x", "1.23.x"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.go-version }}
-      - name: Tidy check
-        run: |
-          go mod tidy
-          git diff --exit-code
-      - name: Vet
-        run: go vet ./...
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Fmt
+        run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy -- -D warnings
       - name: Test
-        run: go test ./...
+        run: cargo test
       - name: Build
-        run: go build ./...
+        run: cargo build --release

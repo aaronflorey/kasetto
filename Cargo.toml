@@ -1,0 +1,18 @@
+[package]
+name = "sukiro"
+version = "0.1.0"
+edition = "2021"
+description = "Fast binary CLI to sync AI skills from local and GitHub sources"
+license = "MIT"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+flate2 = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+sha2 = "0.10"
+tar = "0.4"
+walkdir = "2"

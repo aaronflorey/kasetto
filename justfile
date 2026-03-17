@@ -1,13 +1,13 @@
 fmt:
-	gofmt -w ./cmd ./internal
+	cargo fmt
 
-vet:
-	go vet ./...
+lint:
+	cargo clippy -- -D warnings
 
 test:
-	go test ./...
+	cargo test
 
 build:
-	go build ./...
+	cargo build --release
 
-check: fmt vet test build
+check: fmt lint test build

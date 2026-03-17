@@ -17,7 +17,8 @@ Fast binary CLI to sync AI skills from local paths and GitHub repositories.
 ### From source
 
 ```bash
-go build -o sukiro ./cmd/sukiro
+cargo build --release
+./target/release/sukiro sync --config skills.config.yaml --dry-run
 ```
 
 ### Homebrew (tap)
@@ -80,7 +81,7 @@ skills:
 
 ## CI/CD
 
-- PR and main branch: format/vet/test/build checks
+- PR and main branch: fmt/clippy/test/build checks
 - Tag push (`v*`): cross-platform binaries + checksums + GitHub Release
 
 ## MVP notes

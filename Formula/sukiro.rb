@@ -5,13 +5,13 @@ class Sukiro < Formula
   sha256 "REPLACE_WITH_RELEASE_SHA256"
   license "MIT"
 
-  depends_on "go" => :build
+  depends_on "rust" => :build
 
   def install
-    system "go", "build", *std_go_args(ldflags: "-s -w"), "./cmd/sukiro"
+    system "cargo", "install", *std_cargo_args(path: ".")
   end
 
   test do
-    assert_match "sukiro", shell_output("#{bin}/sukiro --help 2>&1", 0)
+    assert_match "sukiro", shell_output("#{bin}/sukiro sync --help 2>&1", 0)
   end
 end
