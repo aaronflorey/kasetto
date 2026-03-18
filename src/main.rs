@@ -4,8 +4,12 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
-use std::io::Read;
+use std::io::{IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread;
+use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
 use walkdir::WalkDir;
 
@@ -120,15 +124,7 @@ struct Report {
 }
 
 const BANNER: &str = r#"
-   _____       _    _
-  / ____|     | |  (_)
- | (___  _   _| | ___ _ __ ___
-  \___ \| | | | |/ / | '__/ _ \
-  ____) | |_| |   <| | | | (_) |
- |_____/ \__,_|_|\_\_|_|  \___/
-
-              カセット
-              kasetto
+              カセット | KASETTO
 "#;
 
 fn main() -> Result<()> {
@@ -177,14 +173,20 @@ fn load_config_any(config_path: &str) -> Result<(Config, PathBuf, String)> {
 }
 
 fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Result<()> {
+    let animate = animations_enabled(quiet, as_json);
     if !quiet && !as_json {
         print!("{}", BANNER);
     }
 
-    let (cfg, cfg_dir, cfg_label) = load_config_any(config_path)?;
+    let (cfg, cfg_dir, cfg_label) = with_spinner(animate, "Loading config", || {
+        load_config_any(config_path)
+    })?;
     let destination = resolve_path(&cfg_dir, &cfg.destination);
     if !dry_run {
-        fs::create_dir_all(&destination)?;
+        with_spinner(animate, "Preparing destination", || {
+            fs::create_dir_all(&destination)?;
+            Ok(())
+        })?;
     }
 
     let mut state = load_state()?;
@@ -194,13 +196,15 @@ fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Res
 
     for (i, src) in cfg.skills.iter().enumerate() {
         let stage = std::env::temp_dir().join(format!("kasetto-{}-{}", now_unix(), i));
-        match materialize_source(src, &cfg_dir, &stage) {
+        let source_step = format!("Syncing source {}", src.source);
+        match with_spinner(animate, &source_step, || materialize_source(src, &cfg_dir, &stage)) {
             Ok((root, rev, available)) => {
                 let targets = select_targets(&src.skills, &available)?;
                 for (skill_name, skill_path) in targets {
                     let key = format!("{}::{}", src.source, skill_name);
                     desired_keys.insert(key.clone());
-                    let hash = hash_dir(&skill_path)?;
+                    let hash_step = format!("Hashing {}", skill_name);
+                    let hash = with_spinner(animate, &hash_step, || hash_dir(&skill_path))?;
                     let dest = destination.join(&skill_name);
                     if let Some(prev) = state.skills.get(&key) {
                         if prev.hash == hash && dest.exists() {
@@ -235,7 +239,8 @@ fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Res
                         continue;
                     }
 
-                    copy_dir(&skill_path, &dest)?;
+                    let copy_step = format!("Applying {}", skill_name);
+                    with_spinner(animate, &copy_step, || copy_dir(&skill_path, &dest))?;
                     let status = if state.skills.contains_key(&key) {
                         summary.updated += 1;
                         "updated"
@@ -305,7 +310,7 @@ fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Res
 
     if !dry_run {
         state.last_run = Some(now_iso());
-        save_state(&state)?;
+        with_spinner(animate, "Saving state", || save_state(&state))?;
     }
 
     let report = Report {
@@ -316,7 +321,7 @@ fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Res
         summary,
         actions,
     };
-    let report_path = save_report(&report)?;
+    let report_path = with_spinner(animate, "Writing report", || save_report(&report))?;
 
     if as_json {
         println!("{}", serde_json::to_string_pretty(&report)?);
@@ -336,6 +341,51 @@ fn run_sync(config_path: &str, dry_run: bool, quiet: bool, as_json: bool) -> Res
         std::process::exit(1);
     }
     Ok(())
+}
+
+fn animations_enabled(quiet: bool, as_json: bool) -> bool {
+    !quiet && !as_json && std::io::stderr().is_terminal()
+}
+
+fn with_spinner<T, F>(enabled: bool, label: impl Into<String>, operation: F) -> Result<T>
+where
+    F: FnOnce() -> Result<T>,
+{
+    let label = label.into();
+    if !enabled {
+        return operation();
+    }
+
+    let stop = Arc::new(AtomicBool::new(false));
+    let stop_flag = Arc::clone(&stop);
+    let thread_label = label.clone();
+    let handle = thread::spawn(move || {
+        let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+        let mut idx = 0usize;
+        let mut stderr = std::io::stderr();
+        while !stop_flag.load(Ordering::Relaxed) {
+            let _ = write!(
+                stderr,
+                "\r\x1b[2K{}\x1b[90m {}\x1b[0m",
+                frames[idx % frames.len()],
+                thread_label
+            );
+            let _ = stderr.flush();
+            idx = idx.wrapping_add(1);
+            thread::sleep(Duration::from_millis(80));
+        }
+    });
+
+    let result = operation();
+    stop.store(true, Ordering::Relaxed);
+    let _ = handle.join();
+
+    let mut stderr = std::io::stderr();
+    let symbol = if result.is_ok() { "✓" } else { "✗" };
+    let _ = writeln!(stderr, "\r\x1b[2K{}\x1b[90m {}\x1b[0m", symbol, label);
+    let _ = stderr.flush();
+
+    result
 }
 
 fn install_hooks(config_path: &str, timeout: u64, ttl: u64) -> Result<()> {
