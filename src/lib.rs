@@ -1,10 +1,12 @@
 mod app;
 mod banner;
 mod cli;
+mod commands;
 mod error;
 mod fsops;
-mod list_tui;
+mod list;
 mod model;
+mod profile;
 mod ui;
 
 pub use app::run;

@@ -1,20 +1,22 @@
+use reqwest::blocking::Client;
 use rusqlite::{params, Connection, OptionalExtension};
 use sha2::{Digest, Sha256};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::error::{err, Result};
 use crate::model::{
-    Agent, Config, FailedInstall, Report, SkillEntry, SkillTarget, SkillsField, SourceSpec,
-    State,
+    Agent, Config, FailedInstall, Report, SkillEntry, SkillTarget, SkillsField, SourceSpec, State,
 };
 
 pub fn load_config_any(config_path: &str) -> Result<(Config, PathBuf, String)> {
     if config_path.starts_with("http://") || config_path.starts_with("https://") {
-        let response = reqwest::blocking::get(config_path)
+        let response = http_client()?
+            .get(config_path)
+            .send()
             .map_err(|e| err(format!("failed to fetch remote config: {config_path}: {e}")))?;
         let text = response
             .error_for_status()
@@ -45,7 +47,7 @@ pub fn materialize_source(
     src: &SourceSpec,
     cfg_dir: &Path,
     stage: &Path,
-) -> Result<(PathBuf, String, HashMap<String, PathBuf>)> {
+) -> Result<MaterializedSource> {
     if src.source.contains("://") {
         let (owner, repo) = parse_github(&src.source)?;
         let branch = src.branch.clone().unwrap_or_else(|| "main".into());
@@ -60,18 +62,35 @@ pub fn materialize_source(
             }
         })?;
         let available = discover(stage)?;
-        Ok((stage.to_path_buf(), format!("branch:{branch}"), available))
+        Ok(MaterializedSource {
+            source_revision: format!("branch:{branch}"),
+            available,
+            cleanup_dir: Some(stage.to_path_buf()),
+        })
     } else {
         let root = resolve_path(cfg_dir, &src.source);
         let available = discover(&root)?;
-        Ok((root, "local".into(), available))
+        Ok(MaterializedSource {
+            source_revision: "local".into(),
+            available,
+            cleanup_dir: None,
+        })
     }
 }
+
+pub struct MaterializedSource {
+    pub source_revision: String,
+    pub available: HashMap<String, PathBuf>,
+    pub cleanup_dir: Option<PathBuf>,
+}
+
+pub type SelectedTarget = (String, PathBuf);
+pub type TargetSelection = (Vec<SelectedTarget>, Vec<BrokenSkill>);
 
 pub fn select_targets(
     sf: &SkillsField,
     available: &HashMap<String, PathBuf>,
-) -> Result<(Vec<(String, PathBuf)>, Vec<BrokenSkill>)> {
+) -> Result<TargetSelection> {
     let mut out = Vec::new();
     let mut broken = Vec::new();
     match sf {
@@ -347,7 +366,11 @@ fn download_extract(url: &str, dst: &Path) -> Result<()> {
         fs::remove_dir_all(dst)?;
     }
     fs::create_dir_all(dst)?;
-    let body = reqwest::blocking::get(url)?.bytes()?;
+    let body = http_client()?
+        .get(url)
+        .send()?
+        .error_for_status()?
+        .bytes()?;
     let gz = flate2::read::GzDecoder::new(body.as_ref());
     let mut archive = tar::Archive::new(gz);
     for entry in archive.entries()? {
@@ -451,12 +474,29 @@ fn init_db(conn: &Connection) -> Result<()> {
 
 fn persist_state(conn: &mut Connection, state: &State) -> Result<()> {
     let tx = conn.transaction()?;
-    tx.execute("DELETE FROM skills", [])?;
+    let mut existing_ids = HashSet::new();
+    {
+        let mut stmt = tx.prepare("SELECT id FROM skills")?;
+        let rows = stmt.query_map([], |row| row.get::<_, String>(0))?;
+        for row in rows {
+            existing_ids.insert(row?);
+        }
+    }
+    let mut current_ids = HashSet::new();
 
     for (id, entry) in &state.skills {
+        current_ids.insert(id.clone());
         tx.execute(
             "INSERT INTO skills (id, destination, hash, skill, description, source, source_revision, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
+             ON CONFLICT(id) DO UPDATE SET
+               destination=excluded.destination,
+               hash=excluded.hash,
+               skill=excluded.skill,
+               description=excluded.description,
+               source=excluded.source,
+               source_revision=excluded.source_revision,
+               updated_at=excluded.updated_at",
             params![
                 id,
                 &entry.destination,
@@ -468,6 +508,10 @@ fn persist_state(conn: &mut Connection, state: &State) -> Result<()> {
                 &entry.updated_at
             ],
         )?;
+    }
+
+    for stale_id in existing_ids.difference(&current_ids) {
+        tx.execute("DELETE FROM skills WHERE id = ?1", params![stale_id])?;
     }
 
     match &state.last_run {
@@ -493,4 +537,58 @@ fn chrono_like_now() -> String {
         .unwrap()
         .as_secs();
     format!("{}", now)
+}
+
+fn http_client() -> Result<Client> {
+    Client::builder()
+        .connect_timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(30))
+        .user_agent(format!("kasetto/{}", env!("CARGO_PKG_VERSION")))
+        .build()
+        .map_err(|e| err(format!("failed to build HTTP client: {e}")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{SkillsField, SourceSpec};
+
+    fn temp_dir(prefix: &str) -> PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        std::env::temp_dir().join(format!("{prefix}-{}-{nonce}", std::process::id()))
+    }
+
+    #[test]
+    fn parse_github_works_for_https() {
+        let (owner, repo) = parse_github("https://github.com/openai/skills").expect("parse");
+        assert_eq!(owner, "openai");
+        assert_eq!(repo, "skills");
+    }
+
+    #[test]
+    fn local_materialize_does_not_set_cleanup_dir() {
+        let root = temp_dir("kasetto-local-src");
+        let skill_dir = root.join("demo-skill");
+        fs::create_dir_all(&skill_dir).expect("create dirs");
+        fs::write(skill_dir.join("SKILL.md"), "# Demo\n\nDesc\n").expect("write skill");
+
+        let src = SourceSpec {
+            source: root.to_string_lossy().to_string(),
+            branch: None,
+            skills: SkillsField::Wildcard("*".to_string()),
+        };
+        let stage = temp_dir("kasetto-stage");
+        let materialized =
+            materialize_source(&src, Path::new("/"), &stage).expect("materialize local");
+
+        assert!(materialized.cleanup_dir.is_none());
+        assert!(materialized.available.contains_key("demo-skill"));
+        assert!(root.exists());
+
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&stage);
+    }
 }

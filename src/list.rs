@@ -103,6 +103,14 @@ struct TerminalGuard {
     height: u16,
 }
 
+#[derive(Clone, Copy)]
+struct PaneRect {
+    left: usize,
+    top: usize,
+    width: usize,
+    height: usize,
+}
+
 impl TerminalGuard {
     fn enter() -> Result<Self> {
         let (_, term_height) = size()?;
@@ -188,10 +196,12 @@ fn draw(
         state.keep_visible(list_height.saturating_sub(2), items.len());
         draw_list_pane(
             stdout,
-            0,
-            content_top,
-            width,
-            list_height,
+            PaneRect {
+                left: 0,
+                top: content_top,
+                width,
+                height: list_height,
+            },
             items,
             state,
             &colors,
@@ -206,15 +216,17 @@ fn draw(
             &colors,
         )?;
     } else if side_by_side {
-        let list_width = min(max(34, width / 3), 46);
+        let list_width = (width / 3).clamp(34, 46);
         let detail_width = width.saturating_sub(list_width + 1);
         state.keep_visible(content_height.saturating_sub(2), items.len());
         draw_list_pane(
             stdout,
-            0,
-            content_top,
-            list_width,
-            content_height,
+            PaneRect {
+                left: 0,
+                top: content_top,
+                width: list_width,
+                height: content_height,
+            },
             items,
             state,
             &colors,
@@ -232,10 +244,12 @@ fn draw(
         state.keep_visible(content_height.saturating_sub(2), items.len());
         draw_list_pane(
             stdout,
-            0,
-            content_top,
-            width,
-            content_height,
+            PaneRect {
+                left: 0,
+                top: content_top,
+                width,
+                height: content_height,
+            },
             items,
             state,
             &colors,
@@ -345,14 +359,17 @@ fn draw_header(
 
 fn draw_list_pane(
     stdout: &mut Stdout,
-    left: usize,
-    top: usize,
-    width: usize,
-    height: usize,
+    rect: PaneRect,
     items: &[InstalledSkill],
     state: &ListState,
     colors: &Colors,
 ) -> Result<()> {
+    let PaneRect {
+        left,
+        top,
+        width,
+        height,
+    } = rect;
     if width < 10 || height < 4 {
         return Ok(());
     }
