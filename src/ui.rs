@@ -91,3 +91,29 @@ pub fn status_chip(status: &str, plain: bool) -> String {
         _ => format!("\x1b[30;41m {} \x1b[0m", status),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn synced_label_rewrites_syncing_prefix() {
+        assert_eq!(synced_label("Syncing demo"), "Synced demo");
+        assert_eq!(synced_label("Loading source"), "Loading source");
+    }
+
+    #[test]
+    fn status_chip_plain_for_broken_is_x() {
+        assert_eq!(status_chip("broken", true), "[X]");
+        assert_eq!(status_chip("source_error", true), "[X]");
+    }
+
+    #[test]
+    fn with_spinner_disabled_executes_operation_and_returns_result() {
+        let result = with_spinner(false, true, "Syncing demo", || {
+            Ok::<_, crate::error::Error>(42)
+        })
+        .expect("operation");
+        assert_eq!(result, 42);
+    }
+}

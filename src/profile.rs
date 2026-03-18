@@ -142,4 +142,21 @@ mod tests {
 
         let _ = fs::remove_dir_all(&dir);
     }
+
+    #[test]
+    fn profile_falls_back_when_file_missing() {
+        let dir = temp_dir("kasetto-profile-missing");
+        fs::create_dir_all(&dir).expect("create temp dir");
+
+        let (name, description) = read_skill_profile_from_dir(&dir, "fallback-name");
+        assert_eq!(name, "fallback-name");
+        assert_eq!(description, "No description.");
+
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn format_updated_ago_returns_unknown_for_invalid_input() {
+        assert_eq!(format_updated_ago("not-a-timestamp"), "unknown");
+    }
 }

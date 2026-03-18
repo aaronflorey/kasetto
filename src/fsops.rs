@@ -551,7 +551,7 @@ fn http_client() -> Result<Client> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{SkillsField, SourceSpec};
+    use crate::model::{SkillTarget, SkillsField, SourceSpec};
 
     fn temp_dir(prefix: &str) -> PathBuf {
         let nonce = SystemTime::now()
@@ -566,6 +566,14 @@ mod tests {
         let (owner, repo) = parse_github("https://github.com/openai/skills").expect("parse");
         assert_eq!(owner, "openai");
         assert_eq!(repo, "skills");
+    }
+
+    #[test]
+    fn parse_github_trims_git_and_trailing_slash() {
+        let (owner, repo) =
+            parse_github("https://github.com/pivoshenko/kasetto.git/").expect("parse");
+        assert_eq!(owner, "pivoshenko");
+        assert_eq!(repo, "kasetto");
     }
 
     #[test]
@@ -590,5 +598,49 @@ mod tests {
 
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&stage);
+    }
+
+    #[test]
+    fn select_targets_reports_missing_skill() {
+        let mut available = HashMap::new();
+        available.insert("present".to_string(), PathBuf::from("/tmp/present"));
+        let sf = SkillsField::List(vec![
+            SkillTarget::Name("present".to_string()),
+            SkillTarget::Name("missing".to_string()),
+        ]);
+
+        let (targets, broken) = select_targets(&sf, &available).expect("select");
+        assert_eq!(targets.len(), 1);
+        assert_eq!(targets[0].0, "present");
+        assert_eq!(broken.len(), 1);
+        assert_eq!(broken[0].name, "missing");
+        assert!(broken[0].reason.contains("skill not found"));
+    }
+
+    #[test]
+    fn select_targets_prefers_explicit_path_override() {
+        let root = temp_dir("kasetto-targets");
+        let nested = root.join("skills-repo");
+        let skill_dir = nested.join("custom-skill");
+        fs::create_dir_all(&skill_dir).expect("create dirs");
+        fs::write(skill_dir.join("SKILL.md"), "# Custom\n\nDesc\n").expect("write skill");
+
+        let mut available = HashMap::new();
+        available.insert(
+            "custom-skill".to_string(),
+            PathBuf::from("/tmp/wrong-location"),
+        );
+        let sf = SkillsField::List(vec![SkillTarget::Obj {
+            name: "custom-skill".to_string(),
+            path: Some(nested.to_string_lossy().to_string()),
+        }]);
+
+        let (targets, broken) = select_targets(&sf, &available).expect("select");
+        assert!(broken.is_empty());
+        assert_eq!(targets.len(), 1);
+        assert_eq!(targets[0].0, "custom-skill");
+        assert_eq!(targets[0].1, skill_dir);
+
+        let _ = fs::remove_dir_all(&root);
     }
 }
