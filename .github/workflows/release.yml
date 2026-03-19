@@ -1,15 +1,45 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 1.0.0)"
+        required: true
 
 permissions:
   contents: write
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: v${{ github.event.inputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update version in Cargo.toml
+        run: sed -i "s/^version = .*/version = \"${{ github.event.inputs.version }}\"/" Cargo.toml
+
+      - name: Update Cargo.lock
+        run: |
+          rustup default stable
+          cargo update --workspace
+
+      - name: Commit and tag
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Cargo.toml Cargo.lock
+          if ! git diff --cached --quiet; then
+            git commit -m "release: v${VERSION}"
+          fi
+          git tag "v${VERSION}"
+          git push origin main --tags
+
   build:
+    needs: tag
     strategy:
       matrix:
         include:
@@ -30,6 +60,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.tag.outputs.tag }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -60,11 +92,12 @@ jobs:
           path: ${{ matrix.archive }}
 
   release:
-    needs: build
+    needs: [tag, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ needs.tag.outputs.tag }}
           fetch-depth: 0
 
       - name: Download artifacts
@@ -87,15 +120,18 @@ jobs:
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.tag.outputs.tag }}
           body: ${{ steps.changelog.outputs.content }}
           files: |
             dist/*
 
   publish-crate:
-    needs: release
+    needs: [tag, release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.tag.outputs.tag }}
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -105,10 +141,12 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
   update-homebrew:
-    needs: release
+    needs: [tag, release]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.tag.outputs.tag }}
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -120,7 +158,7 @@ jobs:
         env:
           TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ github.event.inputs.version }}"
           SHA256=$(sha256sum dist/kasetto-aarch64-apple-darwin.tar.gz | cut -d' ' -f1)
           SHA256_INTEL=$(sha256sum dist/kasetto-x86_64-apple-darwin.tar.gz | cut -d' ' -f1)
           SHA256_LINUX=$(sha256sum dist/kasetto-x86_64-unknown-linux-gnu.tar.gz | cut -d' ' -f1)

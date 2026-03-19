@@ -106,7 +106,10 @@ mod tests {
     fn synced_label_rewrites_known_prefixes() {
         assert_eq!(synced_label("Syncing demo"), "Synced demo");
         assert_eq!(synced_label("Checking for updates"), "Checked for updates");
-        assert_eq!(synced_label("Updating 1.0.0 -> 1.1.0"), "Updated 1.0.0 -> 1.1.0");
+        assert_eq!(
+            synced_label("Updating 1.0.0 -> 1.1.0"),
+            "Updated 1.0.0 -> 1.1.0"
+        );
         assert_eq!(synced_label("Loading source"), "Loading source");
     }
 
