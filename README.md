@@ -6,7 +6,7 @@
   <a href="https://github.com/pivoshenko/kasetto/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/pivoshenko/kasetto/ci.yml?style=flat-square&logo=github&logoColor=white&label=CI&color=0A6847"></a>
   <img alt="Rust" src="https://img.shields.io/badge/Rust-Stable-0A6847?style=flat-square&logo=rust&logoColor=white">
   <a href="https://github.com/pivoshenko/kasetto/releases"><img alt="Release" src="https://img.shields.io/github/v/release/pivoshenko/kasetto?style=flat-square&logo=github&logoColor=white&color=4856CD&label=Release"></a>
-  <a href="https://github.com/pivoshenko/kasetto/blob/main/LICENSE-MIT"><img alt="License" src="https://img.shields.io/github/license/pivoshenko/kasetto?style=flat-square&logo=opensourceinitiative&logoColor=white&color=0A6847"></a>
+  <a href="https://github.com/pivoshenko/kasetto/blob/main/LICENSE-MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT%20%7C%20Apache--2.0-0A6847?style=flat-square&logo=opensourceinitiative&logoColor=white"></a>
   <a href="https://stand-with-ukraine.pp.ua"><img alt="Stand with Ukraine" src="https://img.shields.io/badge/Stand_With-Ukraine-FFD700?style=flat-square&labelColor=0057B7"></a>
 </p>
 
@@ -27,7 +27,7 @@ Name comes from the Japanese word **カセット** (*kasetto*) - cassette. Think
 
 ## Why Kasetto
 
-There are good tools in this space already - [Vercel Skills](https://github.com/vercel-labs/skills) gives you a curated catalog, and [Claude Plugins](https://claude.com/plugins) offer runtime integrations.
+There are good tools in this space already - [Vercel Skills](https://github.com/vercel-labs/skills) installs skills from a curated catalog, and [Claude Plugins](https://claude.com/plugins) offer runtime integrations. Both work well for one-off installs, but neither gives you a declarative, version-controlled config.
 
 Kasetto is a **community-first** project that solves a different problem: **declarative, reproducible skill management across machines and agents.**
 
