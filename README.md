@@ -249,21 +249,6 @@ Set the `agent` field and Kasetto handles the rest.
 
 Need an agent that isn't listed? Use the `destination` field to point at any path.
 
-## How it works
-
-Kasetto keeps a SQLite database at `~/.kst/manifest.db` to track what's installed.
-
-On every `sync`, it:
-
-1. Reads your config (local file or remote URL)
-2. Resolves the destination from the agent preset or explicit path
-3. Downloads sources (GitHub tarball) or reads local directories
-4. Compares SHA-256 hashes against the manifest to find what changed
-5. Installs new skills, updates changed ones, removes skills no longer in the config
-6. Saves a sync report you can inspect later with `doctor`
-
-Only changed files are written. Runs are atomic - if a single skill fails, the rest still sync.
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
