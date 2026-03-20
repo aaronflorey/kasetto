@@ -1,0 +1,87 @@
+site_name: Kasetto
+site_url: https://kasetto.dev
+site_description: An extremely fast AI skills manager, written in Rust.
+repo_url: https://github.com/pivoshenko/kasetto
+repo_name: pivoshenko/kasetto
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  custom_dir: docs/.overrides
+  logo: assets/icon.svg
+  favicon: assets/icon.svg
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: kasetto-light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: kasetto-dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.footer
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+    - content.code.annotate
+    - toc.follow
+    - search.suggest
+    - search.highlight
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pivoshenko/kasetto
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      anchorlink: true
+      anchorlink_class: "toclink"
+  - pymdownx.details
+  - pymdownx.snippets
+  - pymdownx.magiclink
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.keys
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+nav:
+  - Introduction: index.md
+  - Getting started:
+      - Installation: installation.md
+      - Quick start: getting-started.md
+  - Reference:
+      - Configuration: configuration.md
+      - Commands: commands.md
+      - Supported agents: agents.md
+  - Roadmap: roadmap.md

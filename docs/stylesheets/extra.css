@@ -1,0 +1,282 @@
+:root {
+  --kst-pink: #ff8cda;
+  --kst-purple: #c86bff;
+  --kst-bg: #0b0b0b;
+  --kst-surface: #111111;
+}
+
+[data-md-color-scheme="kasetto-light"] {
+  --md-default-bg-color--dark: var(--kst-bg);
+  --md-default-fg-color--lightest: rgba(0, 0, 0, 0.14);
+  --md-primary-fg-color: var(--kst-bg);
+  --md-typeset-a-color: #9b4dca;
+  --md-accent-fg-color: var(--kst-purple);
+}
+
+[data-md-color-scheme="kasetto-dark"] {
+  --md-default-bg-color: var(--kst-bg);
+  --md-default-fg-color: #ffffff;
+  --md-default-fg-color--light: #ffffff;
+  --md-default-fg-color--lighter: #ffffff;
+  --md-default-fg-color--lightest: rgba(255, 255, 255, 0.5);
+  --md-primary-fg-color: var(--kst-surface);
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: var(--kst-purple);
+  --md-typeset-color: #ffffff;
+  --md-typeset-a-color: var(--kst-pink);
+  --md-typeset-mark-color: #ffac2f;
+  --md-code-fg-color: #ffffff;
+  --md-code-bg-color: var(--kst-surface);
+  --md-code-hl-comment-color: #6f5d6f;
+  --md-code-hl-punctuation-color: #6f5d6f;
+  --md-code-hl-generic-color: var(--kst-pink);
+  --md-code-hl-variable-color: #f4f4f1;
+  --md-code-hl-string-color: #fbbf24;
+  --md-code-hl-keyword-color: var(--kst-pink);
+  --md-code-hl-operator-color: var(--kst-pink);
+  --md-code-hl-number-color: #46ebe1;
+  --md-code-hl-special-color: #46ebe1;
+  --md-code-hl-function-color: var(--kst-purple);
+  --md-code-hl-constant-color: #fbbf24;
+  --md-code-hl-name-color: var(--md-code-fg-color);
+  --md-typeset-del-color: hsla(6, 90%, 60%, 0.15);
+  --md-typeset-ins-color: hsla(150, 90%, 44%, 0.15);
+  --md-typeset-table-color: hsla(0, 0%, 100%, 0.12);
+  --md-typeset-table-color--light: hsla(0, 0%, 100%, 0.035);
+}
+
+[data-md-color-scheme="kasetto-dark"] div.admonition {
+  color: var(--md-code-fg-color);
+  background-color: var(--md-code-bg-color);
+}
+
+.md-typeset__table {
+  min-width: 100%;
+}
+
+.md-typeset table:not([class]) {
+  display: table;
+}
+
+.md-nav--primary .md-nav__title {
+  box-shadow: none;
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-nav__title {
+    display: none;
+  }
+
+  .md-main {
+    min-height: 100vh;
+  }
+
+  .md-nav--primary .md-nav {
+    font-size: 0.75rem;
+  }
+
+  .md-nav__item--section > .md-nav__link {
+    font-weight: normal;
+    font-size: 0.85rem;
+  }
+
+  .md-nav--primary .md-nav__link {
+    margin: 0;
+  }
+
+  .md-nav--primary .md-nav__item {
+    margin-top: 0.35em;
+  }
+
+  .md-nav--primary .md-nav__item--section {
+    margin-bottom: 0.75em;
+    margin-top: 1em;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list {
+    font-size: 0.725rem;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list > .md-nav__item:first-of-type {
+    margin-top: 0.5em;
+  }
+
+  .md-nav__item--section > .md-nav > .md-nav__list > .md-nav__item > .md-nav > .md-nav__list > .md-nav__item:last-of-type {
+    margin-bottom: 0.575em;
+  }
+
+  .md-nav--primary > .md-nav__list > .md-nav__item:first-of-type {
+    font-size: 0.85rem;
+    margin-bottom: 0.75em;
+  }
+}
+
+.md-nav__link--active {
+  font-weight: bold;
+}
+
+.highlight .gp,
+.highlight .go {
+  user-select: none;
+}
+
+.md-main__inner {
+  margin-top: 0;
+}
+
+[data-md-color-scheme="kasetto-dark"] .md-typeset .keys kbd {
+  background-color: #161616;
+  border: 1px solid #222222;
+  box-shadow: none;
+  color: #777777;
+}
+
+[data-md-color-scheme="kasetto-dark"] .md-clipboard {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+[data-md-color-scheme="kasetto-dark"] .md-clipboard:hover {
+  color: var(--kst-purple);
+}
+
+.md-header__topic .md-ellipsis {
+  display: none;
+}
+
+.toclink {
+  color: unset !important;
+}
+
+.toclink:hover {
+  color: var(--md-accent-fg-color) !important;
+}
+
+.md-path__list > .md-path__item:first-of-type {
+  display: none;
+}
+
+.md-path__list > .md-path__item:nth-of-type(2):before {
+  display: none;
+}
+
+.kst-hero {
+  text-align: center;
+  padding: 0.5rem 1rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.kst-logo {
+  max-width: 560px;
+  width: 100%;
+  height: auto;
+  margin-bottom: 0;
+}
+
+.kst-hero .kst-tagline {
+  font-size: 0.8rem;
+  color: var(--md-default-fg-color--light);
+  margin-top: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.kst-hero .kst-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.kst-hero .kst-buttons a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 2rem;
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.kst-btn-primary {
+  background: transparent;
+  border: 1px solid rgba(200, 107, 255, 0.4);
+  color: var(--kst-purple) !important;
+}
+
+.kst-btn-primary:hover {
+  border-color: var(--kst-purple);
+  background: rgba(200, 107, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.kst-install {
+  max-width: 520px;
+  margin: 0 auto 1rem;
+}
+
+.kst-install pre {
+  text-align: left;
+}
+
+.kst-install .md-clipboard {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.kst-install .md-clipboard:hover {
+  color: var(--kst-purple);
+}
+
+.kst-features {
+  display: grid;
+  grid-template-columns: repeat(3, 240px);
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 1rem 0 4rem;
+  margin: 0 auto;
+}
+
+.kst-feature {
+  padding: 1.5rem;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 8px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease;
+}
+
+.kst-feature:hover {
+  border-color: var(--kst-purple);
+}
+
+.kst-feature h3 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--md-code-font);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 !important;
+}
+
+.kst-section-title {
+  font-family: var(--md-code-font);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--md-default-fg-color--lightest);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .kst-logo {
+    max-width: 360px;
+  }
+
+  .kst-features {
+    grid-template-columns: 1fr;
+  }
+}

@@ -249,6 +249,13 @@ Set the `agent` field and Kasetto handles the rest.
 
 Need an agent that isn't listed? Use the `destination` field to point at any path.
 
+## Roadmap
+
+- MCP servers management
+- Agents management
+- Hooks management
+- Your idea? [Open an issue](https://github.com/pivoshenko/kasetto/issues)
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
