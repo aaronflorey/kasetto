@@ -26,6 +26,7 @@ clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 crossterm = "0.29"
 flate2 = "1"
+mimalloc = "0.1"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
@@ -50,6 +51,6 @@ todo = "warn"
 
 [profile.release]
 codegen-units = 1
-lto = "thin"
+lto = "fat"
 panic = "abort"
 strip = "symbols"

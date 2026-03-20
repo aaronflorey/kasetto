@@ -3,7 +3,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
-use std::io::Read;
+use std::io::{BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -149,14 +149,20 @@ pub fn hash_dir(path: &Path) -> Result<String> {
     files.sort();
 
     let mut hasher = Sha256::new();
+    let mut buf = [0u8; 8192];
     for f in files {
         let rel = f.strip_prefix(path)?.to_string_lossy();
         hasher.update(rel.as_bytes());
         hasher.update([0]);
-        let mut file = fs::File::open(&f)?;
-        let mut buf = Vec::new();
-        file.read_to_end(&mut buf)?;
-        hasher.update(&buf);
+        let file = fs::File::open(&f)?;
+        let mut reader = BufReader::new(file);
+        loop {
+            let n = reader.read(&mut buf)?;
+            if n == 0 {
+                break;
+            }
+            hasher.update(&buf[..n]);
+        }
         hasher.update([0]);
     }
     Ok(format!("{:x}", hasher.finalize()))
@@ -418,7 +424,11 @@ fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
             if let Some(parent) = target.parent() {
                 fs::create_dir_all(parent)?;
             }
-            fs::copy(src_path, target)?;
+            let reader = BufReader::new(fs::File::open(&src_path)?);
+            let mut writer = BufWriter::new(fs::File::create(&target)?);
+            let mut buf_reader = reader;
+            std::io::copy(&mut buf_reader, &mut writer)?;
+            writer.flush()?;
         }
     }
     Ok(())
@@ -443,6 +453,9 @@ fn init_db(conn: &Connection) -> Result<()> {
     conn.execute_batch(
         r#"
         PRAGMA journal_mode=WAL;
+        PRAGMA synchronous=NORMAL;
+        PRAGMA cache_size=-8000;
+        PRAGMA temp_store=MEMORY;
         CREATE TABLE IF NOT EXISTS meta (
             key TEXT PRIMARY KEY,
             value TEXT NOT NULL
@@ -457,11 +470,14 @@ fn init_db(conn: &Connection) -> Result<()> {
             source_revision TEXT NOT NULL,
             updated_at TEXT NOT NULL
         );
+        CREATE INDEX IF NOT EXISTS idx_skills_source ON skills(source);
+        CREATE INDEX IF NOT EXISTS idx_skills_destination ON skills(destination);
         CREATE TABLE IF NOT EXISTS reports (
             run_id TEXT PRIMARY KEY,
             created_at INTEGER NOT NULL,
             report_json TEXT NOT NULL
         );
+        CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports(created_at);
         "#,
     )?;
     Ok(())
