@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-03-20
+
+### Features
+
+- Add Windows builds and Scoop distribution
+
 ## [1.1.0] - 2026-03-20
 
 ### Bug fixes
@@ -24,6 +30,10 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Add shell completions and auto version bumping
+
+### Release
+
+- V1.1.0
 
 ### Style
 
