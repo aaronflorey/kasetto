@@ -1,8 +1,8 @@
 [package]
 name = "kasetto"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
-description = "An extremely fast AI skills manager, written in Rust."
+description = "A declarative AI agent environment manager, written in Rust."
 authors = ["Volodymyr Pivoshenko"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"

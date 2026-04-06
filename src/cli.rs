@@ -11,7 +11,7 @@ use crate::model::Scope;
     args_conflicts_with_subcommands = true,
     styles = crate::colors::clap_styles(),
     about = "sync and maintain local AI skill packs",
-    long_about = "An extremely fast AI skills manager, written in Rust.",
+    long_about = "A declarative AI agent environment manager, written in Rust.",
     after_help = crate::cli_examples!(
         "kasetto",
         "kasetto --config kasetto.yaml --dry-run",

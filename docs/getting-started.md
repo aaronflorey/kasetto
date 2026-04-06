@@ -12,7 +12,7 @@ Once you've [installed Kasetto](./installation.md), run `kst` to make sure it's 
 
 ```bash
 kst
-An extremely fast AI skills manager
+A declarative AI agent environment manager
 
 Usage: kst <COMMAND>
 

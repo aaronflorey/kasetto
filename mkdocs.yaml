@@ -1,6 +1,6 @@
 site_name: Kasetto
 site_url: https://kasetto.dev
-site_description: An extremely fast AI skills manager, written in Rust.
+site_description: A declarative AI agent environment manager, written in Rust.
 repo_url: https://github.com/pivoshenko/kasetto
 repo_name: pivoshenko/kasetto
 edit_uri: edit/main/docs/

@@ -14,7 +14,7 @@ title: ""
 <div class="kst-hero" markdown>
 
 <img src="assets/logo.svg" alt="Kasetto" class="kst-logo">
-<p class="kst-tagline">An extremely fast AI skills manager, written in Rust.</p>
+<p class="kst-tagline">A declarative AI agent environment manager, written in Rust.</p>
 
 <div class="kst-install" markdown>
 

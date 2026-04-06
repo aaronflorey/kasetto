@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pivoshenko/kasetto/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/pivoshenko/kasetto/ci.yml?style=flat-square&logo=github&logoColor=white&label=CI&color=0A6847"></a>
+  <a href="https://github.com/pivoshenko/kasetto/actions/workflows/ci.yaml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/pivoshenko/kasetto/ci.yaml?style=flat-square&logo=github&logoColor=white&label=CI&color=0A6847"></a>
   <img alt="Rust" src="https://img.shields.io/badge/Rust-Stable-0A6847?style=flat-square&logo=rust&logoColor=white">
   <a href="https://github.com/pivoshenko/kasetto/releases"><img alt="Release" src="https://img.shields.io/github/v/release/pivoshenko/kasetto?style=flat-square&logo=github&logoColor=white&color=4856CD&label=Release"></a>
   <a href="https://github.com/pivoshenko/kasetto/blob/main/LICENSE-MIT"><img alt="License" src="https://img.shields.io/badge/License-MIT%20%7C%20Apache--2.0-0A6847?style=flat-square&logo=opensourceinitiative&logoColor=white"></a>
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  An extremely fast AI skills manager, written in Rust.
+  A declarative AI agent environment manager, written in Rust.
 </p>
 
 Name comes from the Japanese word **カセット** (*kasetto*) - cassette. Think of skill sources as cassettes you plug in, swap out, and share across machines.

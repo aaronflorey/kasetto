@@ -219,7 +219,7 @@ jobs:
 
           cat > formula.rb << FORMULA
           class Kasetto < Formula
-            desc "An extremely fast AI skills manager"
+            desc "A declarative AI agent environment manager, written in Rust."
             homepage "https://github.com/pivoshenko/kasetto"
             version "${VERSION}"
             license any_of: ["MIT", "Apache-2.0"]
@@ -294,7 +294,7 @@ jobs:
           cat > kasetto.json << MANIFEST
           {
             "version": "${VERSION}",
-            "description": "An extremely fast AI skills manager",
+            "description": "A declarative AI agent environment manager, written in Rust.",
             "homepage": "https://github.com/pivoshenko/kasetto",
             "license": "MIT|Apache-2.0",
             "architecture": {
