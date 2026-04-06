@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2026-04-06
+
+### Documentation
+
+- Update sections
+- Update notes
+- Update descriptions
+- Add icons into cards
+- Add authentication, skill format, multi-agent, and git host docs
+- Update documentation to match current codebase
+
+### Features
+
+- Add init, clean, uninstall, completions commands and MCP support
+
+### Miscellaneous
+
+- **deps**: Bump unicode-width from 0.1.14 to 0.2.2
+- **deps**: Bump actions/download-artifact from 4 to 8
+- **deps**: Bump actions/upload-artifact from 4 to 7
+
+### Refactor
+
+- Run linters
+- Update flags
+- Align Home and List TUIs
+- Rename config example
+
+### Build
+
+- Update dev dependencies
+- Update dependencies
+
+### Style
+
+- Run formatters
+- Run formatters
+
 ## [1.2.1] - 2026-03-20
 
 ### Documentation
@@ -11,6 +49,10 @@ All notable changes to this project will be documented in this file.
 ### Perf
 
 - Use mimalloc, fat LTO, streaming I/O, and SQLite tuning
+
+### Release
+
+- V1.2.1
 
 ## [1.2.0] - 2026-03-20
 
