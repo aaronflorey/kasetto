@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.1] - 2026-04-06
+
+### Miscellaneous
+
+- Rebrand description and bump version to 2.0.1
+
 ## [2.0.0] - 2026-04-06
 
 ### Documentation
@@ -34,6 +40,10 @@ All notable changes to this project will be documented in this file.
 
 - Update dev dependencies
 - Update dependencies
+
+### Release
+
+- V2.0.0
 
 ### Style
 
