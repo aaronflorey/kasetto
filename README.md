@@ -16,27 +16,18 @@
 
 Name comes from the Japanese word **カセット** (*kasetto*) - cassette. Think of skill sources as cassettes you plug in, swap out, and share across machines.
 
-## Highlights
-
-- **Declarative** - one YAML config describes your entire skill setup. Version it, share it, bootstrap a whole team in seconds.
-- Syncs skills from **GitHub, GitLab, Bitbucket, Codeberg/Gitea** repositories or **local directories** including **GitHub Enterprise** and **self-hosted GitLab**.
-- **21 built-in agent presets**: Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and [many more](#supported-agents).
-- **MCP server management**: declare MCP servers in the same config and Kasetto merges them into each agent's native settings file.
-- Tracks every install in a local manifest - knows what changed and why.
-- `--dry-run`, `--json`, and `--verbose` flags for scripting and CI.
-- Ships as a single binary - install as `kasetto`, run as `kst`.
-
 ## Why Kasetto
 
 There are good tools in this space already - [Vercel Skills](https://github.com/vercel-labs/skills) installs skills from a curated catalog, and [Claude Plugins](https://claude.com/plugins) offer runtime integrations. Both work well for one-off installs, but neither gives you a declarative, version-controlled config.
 
 Kasetto is a **community-first** project that solves a different problem: **declarative, reproducible skill management across machines and agents.**
 
-- **Team consistency** - commit a YAML file, everyone gets the same skills.
-- **Multi-source** - pull from GitHub, GitLab, Bitbucket, Codeberg/Gitea repositories and local folders in one config.
-- **Agent-agnostic** - one config field switches between 21 agent environments.
-- **Traceable** - every install is tracked, diffable, and inspectable.
-- **CI-friendly** - `--json` output and non-zero exit codes for automation.
+- **Declarative** — one YAML config describes your entire skill setup. Version it, share it, bootstrap a whole team in seconds. The config is the source of truth — readable, auditable, version-controlled.
+- **Enterprise & private repos** — GitHub, GitLab, Bitbucket, Codeberg, Gitea, and self-hosted instances out of the box. Onboard new engineers in one command. Everyone gets the exact same environment — zero drift, zero surprises.
+- **Multi-agent** — 21 built-in agent presets: Claude Code, Cursor, Codex, Windsurf, Copilot, Gemini CLI, and [many more](#supported-agents). One config, every agent updated.
+- **Skills & MCP** — any directory with a `SKILL.md` is a skill — no registry, no boilerplate. MCP server configs are auto-merged into every supported format (Cursor JSON, Claude JSON, Copilot VS Code, Codex TOML).
+- **Speed** — written in Rust. SHA-256 content hashing and lock file diffing mean only what changed gets touched. Full sync across all 21 agents finishes in seconds.
+- **Universal** — single static binary for macOS, Linux, and Windows. Install as `kasetto`, run as `kst`. CI-friendly with `--json` output and proper exit codes.
 
 > Inspired by [uv](https://github.com/astral-sh/uv) - what uv did for Python packages, Kasetto aims to do for AI skills.
 
