@@ -118,15 +118,21 @@ fn print_sync_summary(report: &Report, plain: bool, verbose: bool) {
     if plain {
         println!(
             "  {:<L1$} {:>NW$}   {:<L2$} {:>NW$}   {:<L3$} {:>NW$}",
-            "Installed:", report.summary.installed,
-            "Updated:",   report.summary.updated,
-            "Removed:",   report.summary.removed,
+            "Installed:",
+            report.summary.installed,
+            "Updated:",
+            report.summary.updated,
+            "Removed:",
+            report.summary.removed,
         );
         println!(
             "  {:<L1$} {:>NW$}   {:<L2$} {:>NW$}   {:<L3$} {:>NW$}",
-            "Unchanged:", report.summary.unchanged,
-            "Broken:",    report.summary.broken,
-            "Failed:",    report.summary.failed,
+            "Unchanged:",
+            report.summary.unchanged,
+            "Broken:",
+            report.summary.broken,
+            "Failed:",
+            report.summary.failed,
         );
     } else {
         const W1: usize = 10;
@@ -134,15 +140,33 @@ fn print_sync_summary(report: &Report, plain: bool, verbose: bool) {
         const W3: usize = 7;
         println!(
             "  {}Installed{}{}: {:>NW$}   {}Updated{}{}: {:>NW$}   {}Removed{}{}: {:>NW$}",
-            SUCCESS, RESET, " ".repeat(W1.saturating_sub("Installed".len())), report.summary.installed,
-            INFO,    RESET, " ".repeat(W2.saturating_sub("Updated".len())),   report.summary.updated,
-            WARNING, RESET, " ".repeat(W3.saturating_sub("Removed".len())),   report.summary.removed,
+            SUCCESS,
+            RESET,
+            " ".repeat(W1.saturating_sub("Installed".len())),
+            report.summary.installed,
+            INFO,
+            RESET,
+            " ".repeat(W2.saturating_sub("Updated".len())),
+            report.summary.updated,
+            WARNING,
+            RESET,
+            " ".repeat(W3.saturating_sub("Removed".len())),
+            report.summary.removed,
         );
         println!(
             "  {}Unchanged{}{}: {:>NW$}   {}Broken{}{}: {:>NW$}   {}Failed{}{}: {:>NW$}",
-            SECONDARY,  RESET, " ".repeat(W1.saturating_sub("Unchanged".len())), report.summary.unchanged,
-            ATTENTION,  RESET, " ".repeat(W2.saturating_sub("Broken".len())),    report.summary.broken,
-            ERROR,      RESET, " ".repeat(W3.saturating_sub("Failed".len())),    report.summary.failed,
+            SECONDARY,
+            RESET,
+            " ".repeat(W1.saturating_sub("Unchanged".len())),
+            report.summary.unchanged,
+            ATTENTION,
+            RESET,
+            " ".repeat(W2.saturating_sub("Broken".len())),
+            report.summary.broken,
+            ERROR,
+            RESET,
+            " ".repeat(W3.saturating_sub("Failed".len())),
+            report.summary.failed,
         );
     }
 
