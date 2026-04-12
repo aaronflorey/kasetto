@@ -41,7 +41,8 @@ impl Config {
 /// Resolve the effective scope: CLI override > config YAML `scope:` field > Global default.
 ///
 /// When a `Config` is already loaded, pass it directly. Otherwise the function
-/// reads `kasetto.yaml` from the current directory as a fallback.
+/// reads the default config path (local `kasetto.yaml`, then global XDG config)
+/// as a fallback.
 pub(crate) fn resolve_scope(cli_override: Option<Scope>, cfg: Option<&Config>) -> Scope {
     if let Some(s) = cli_override {
         return s;
@@ -49,12 +50,23 @@ pub(crate) fn resolve_scope(cli_override: Option<Scope>, cfg: Option<&Config>) -
     if let Some(cfg) = cfg {
         return cfg.resolved_scope();
     }
-    if let Ok(text) = std::fs::read_to_string(crate::DEFAULT_CONFIG_FILENAME) {
+    if let Ok(text) = std::fs::read_to_string(crate::default_config_path()) {
         if let Ok(cfg) = serde_yaml::from_str::<Config>(&text) {
             return cfg.resolved_scope();
         }
     }
     Scope::Global
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{resolve_scope, Scope};
+
+    #[test]
+    fn resolve_scope_prefers_cli_override() {
+        assert_eq!(resolve_scope(Some(Scope::Project), None), Scope::Project);
+        assert_eq!(resolve_scope(Some(Scope::Global), None), Scope::Global);
+    }
 }
 
 #[derive(Debug, Deserialize)]

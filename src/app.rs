@@ -2,19 +2,18 @@ use clap::Parser;
 use std::path::Path;
 
 use crate::cli::{Cli, Commands, SelfAction, SyncArgs};
+use crate::default_config_path;
 use crate::error::Result;
-use crate::DEFAULT_CONFIG_FILENAME;
 
 pub fn run() -> Result<()> {
     let cli = Cli::parse();
     let program_name = current_program_name();
-    match resolve_command(cli, Path::new(DEFAULT_CONFIG_FILENAME).exists()) {
+    let default_config = default_config_path();
+    match resolve_command(cli, Path::new(&default_config).exists()) {
         StartupMode::Command(command) => match command {
             Commands::Init { force } => crate::commands::init::run(force),
             Commands::Sync { sync } => {
-                let config = sync
-                    .config
-                    .unwrap_or_else(|| DEFAULT_CONFIG_FILENAME.into());
+                let config = sync.config.unwrap_or_else(|| default_config.clone());
                 crate::commands::sync::run(&crate::commands::sync::SyncOptions {
                     config_path: &config,
                     dry_run: sync.dry_run,
@@ -64,7 +63,7 @@ pub fn run() -> Result<()> {
                 crate::commands::completions::run(shell, &program_name)
             }
         },
-        StartupMode::Home => crate::home::run(&program_name, DEFAULT_CONFIG_FILENAME),
+        StartupMode::Home => crate::home::run(&program_name, &default_config),
     }
 }
 

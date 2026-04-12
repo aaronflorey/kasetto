@@ -125,7 +125,7 @@ kst sync [--config <path-or-url>] [--dry-run] [--quiet] [--json] [--plain] [--ve
 
 | Flag        | What it does                                                 |
 | ----------- | ------------------------------------------------------------ |
-| `--config`  | Path or HTTPS URL to a YAML config (default: `kasetto.yaml`) |
+| `--config`  | Path or HTTPS URL to a YAML config (default order: `./kasetto.yaml`, then `$XDG_CONFIG_HOME/kasetto/config.yaml`) |
 | `--dry-run` | Preview what would change without writing anything           |
 | `--quiet`   | Suppress non-error output                                    |
 | `--json`    | Print the sync report as JSON                                |
@@ -199,7 +199,12 @@ Supported shells: `bash`, `zsh`, `fish`, `powershell`.
 
 ## Configuration
 
-Kasetto looks for `kasetto.yaml` in the current directory by default. Point it at a specific file or URL with `--config`, or run `kst init` to generate a starter.
+When `--config` is omitted, Kasetto looks for config in this order:
+
+1. `./kasetto.yaml`
+2. `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)
+
+Point it at a specific file or URL with `--config`, or run `kst init` to generate a starter `kasetto.yaml` in the current directory.
 
 ```yaml
 # Choose an agent preset (single or multiple)...
