@@ -12,7 +12,7 @@ const INSTALL = [
   },
   {
     label: "WINDOWS (POWERSHELL)",
-    cmd: 'powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.ps1 | iex"',
+    cmd: 'powershell -ExecutionPolicy Bypass -c "irm kasetto.dev/install.ps1 | iex"',
   },
   {
     label: "HOMEBREW",
@@ -138,7 +138,9 @@ export default async function Page() {
 
       {/* ── Footer ── */}
       <footer className="footer">
-        <span className="footer-left">2026 Volodymyr Pivoshenko &lt;contact@pivoshenko.dev&gt;</span>
+        <span className="footer-left">
+          2026 Volodymyr Pivoshenko &lt;contact@pivoshenko.dev&gt;
+        </span>
         <div className="footer-links">
           <a
             href="https://github.com/pivoshenko"

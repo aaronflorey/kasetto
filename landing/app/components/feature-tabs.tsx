@@ -172,7 +172,7 @@ function renderTokens(tokens: Token[]) {
       parts.push(
         <span key={key++} className={cls}>
           {tok.v}
-        </span>,
+        </span>
       );
     }
   }

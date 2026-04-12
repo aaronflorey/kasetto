@@ -19,7 +19,7 @@ title: ""
 <div class="kst-install" markdown>
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.sh | sh
+curl -fsSL kasetto.dev/install | sh
 ```
 
 </div>

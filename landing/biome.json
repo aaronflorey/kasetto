@@ -32,10 +32,6 @@
     }
   },
   "files": {
-    "includes": [
-      "**",
-      "!.next",
-      "!node_modules"
-    ]
+    "includes": ["**", "!.next", "!node_modules"]
   }
 }

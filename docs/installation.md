@@ -13,7 +13,7 @@ The quickest way to get started — downloads and installs the binary in one com
     Use `curl` to download the script and execute it with `sh`:
 
     ```bash
-    curl -fsSL https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.sh | sh
+    curl -fsSL kasetto.dev/install | sh
     ```
 
 === "Windows"
@@ -21,7 +21,7 @@ The quickest way to get started — downloads and installs the binary in one com
     Use `irm` to download the script and execute it with `iex`:
 
     ```pwsh-session
-    PS> powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.ps1 | iex"
+    PS> powershell -ExecutionPolicy Bypass -c "irm kasetto.dev/install.ps1 | iex"
     ```
 
     Changing the [execution policy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies) allows running a script from the internet.
@@ -39,7 +39,7 @@ The quickest way to get started — downloads and installs the binary in one com
     === "Windows"
 
         ```pwsh-session
-        PS> powershell -c "irm https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.ps1 | more"
+        PS> powershell -c "irm kasetto.dev/install.ps1 | more"
         ```
 
     Alternatively, binaries can be downloaded directly from [GitHub Releases](#github-releases).

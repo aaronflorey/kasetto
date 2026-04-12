@@ -111,10 +111,3 @@ kst sync --config https://github.com/org/private-repo/raw/main/kasetto.yaml
 ```
 
 If the URL points to a private resource and no matching token is set, Kasetto reports an HTTP error with a hint about which variable to set.
-
-## Display Variables
-
-| Variable   | Effect                                                                    |
-| ---------- | ------------------------------------------------------------------------- |
-| `NO_TUI`   | Disables interactive screens (home menu, list browser). Set to any value. |
-| `NO_COLOR` | Disables colored output. Set to any value.                                |

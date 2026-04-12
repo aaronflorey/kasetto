@@ -38,13 +38,13 @@ Kasetto is a **community-first** project that solves a different problem: **decl
 **macOS and Linux:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.sh | sh
+curl -fsSL kasetto.dev/install | sh
 ```
 
 **Windows:**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.ps1 | iex"
+powershell -ExecutionPolicy Bypass -c "irm kasetto.dev/install.ps1 | iex"
 ```
 
 By default the binary is placed in `~/.local/bin`. You can override this with environment variables:
@@ -58,6 +58,13 @@ By default the binary is placed in `~/.local/bin`. You can override this with en
 
 ```bash
 brew install pivoshenko/tap/kasetto
+```
+
+### Scoop (Windows)
+
+```bash
+scoop bucket add kasetto https://github.com/pivoshenko/scoop-bucket
+scoop install kasetto
 ```
 
 ### Cargo
@@ -294,7 +301,7 @@ Set an environment variable and private sources just work — no login command, 
 | --------------------------- | --------------------------------------------------- |
 | GitHub / GitHub Enterprise  | `GITHUB_TOKEN` or `GH_TOKEN`                        |
 | GitLab / GitLab self-hosted | `GITLAB_TOKEN` or `CI_JOB_TOKEN`                    |
-| Bitbucket Cloud             | `BITBUCKET_EMAIL` + `BITBUCKET_TOKEN`               |
+| Bitbucket Cloud             | `BITBUCKET_EMAIL` + `BITBUCKET_TOKEN` (or `BITBUCKET_USERNAME` + `BITBUCKET_APP_PASSWORD`) |
 | Codeberg / Gitea / Forgejo  | `GITEA_TOKEN`, `CODEBERG_TOKEN`, or `FORGEJO_TOKEN` |
 
 Kasetto auto-detects GitHub Enterprise for any hostname with an `owner/repo` path, and GitLab self-hosted when the hostname starts with `gitlab.`.

@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install kasetto
-        run: curl -fsSL https://raw.githubusercontent.com/pivoshenko/kasetto/main/scripts/install.sh | sh
+        run: curl -fsSL kasetto.dev/install | sh
 
       - name: Validate kasetto.yaml
         env:
