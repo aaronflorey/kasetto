@@ -26,7 +26,7 @@ kst sync [OPTIONS]
 
 | Flag                     | Description                                                  |
 | ------------------------ | ------------------------------------------------------------ |
-| `--config <path-or-url>` | Path or HTTPS URL to a YAML config (default: `kasetto.yaml`) |
+| `--config <path-or-url>` | Path or HTTPS URL to a YAML config (default order: `./kasetto.yaml`, then `$XDG_CONFIG_HOME/kasetto/config.yaml`) |
 | `--dry-run`              | Preview what would change without writing anything           |
 | `--quiet`                | Suppress non-error output                                    |
 | `--json`                 | Print the sync report as JSON                                |
