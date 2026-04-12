@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IoCopyOutline } from "react-icons/io5";
-import { IoCheckmarkOutline } from "react-icons/io5";
+import { IoCheckmarkOutline, IoCopyOutline } from "react-icons/io5";
 
 export function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);

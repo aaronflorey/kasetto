@@ -1,9 +1,8 @@
-import { GoStar } from "react-icons/go";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa";
-
-import { CopyButton } from "./components/copy-button";
+import { GoStar } from "react-icons/go";
 import { AgentsGrid } from "./components/agents-grid";
-import { FeatureList, ConfigExample } from "./components/feature-tabs";
+import { CopyButton } from "./components/copy-button";
+import { ConfigExample, FeatureList } from "./components/feature-tabs";
 
 const INSTALL = [
   {
