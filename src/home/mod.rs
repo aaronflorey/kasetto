@@ -39,7 +39,7 @@ pub(crate) fn run(program_name: &str, default_config: &str) -> Result<()> {
                 show_banner: true,
             })
         }
-        HomeAction::Init => crate::commands::init::run(false),
+        HomeAction::Init => crate::commands::init::run(false, false),
         HomeAction::List => crate::commands::list::run(false, false, false, None),
         HomeAction::Doctor => crate::commands::doctor::run(false, false, false, None, program_name),
         HomeAction::SelfUpdate => crate::commands::self_update::run(false),
@@ -93,7 +93,7 @@ struct HomeItem {
 const HOME_ITEMS: [HomeItem; 7] = [
     HomeItem {
         title: "init",
-        command: "kasetto init [--force]",
+        command: "kasetto init [--global] [--force]",
         action: HomeItemAction::Init,
     },
     HomeItem {

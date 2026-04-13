@@ -1,12 +1,13 @@
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::Path;
+use std::path::PathBuf;
 
 use crate::banner::print_banner;
 use crate::colors::{ACCENT, RESET, SECONDARY, SUCCESS, WARNING};
 use crate::error::{err, Result};
+use crate::fsops::dirs_kasetto_config;
 use crate::ui::{SYM_FAIL, SYM_OK};
-use crate::DEFAULT_CONFIG_FILENAME;
+use crate::{DEFAULT_CONFIG_FILENAME, DEFAULT_GLOBAL_CONFIG_FILENAME};
 
 const TEMPLATE: &str = r#"# Kasetto - https://github.com/pivoshenko/kasetto
 
@@ -37,10 +38,10 @@ const TEMPLATE: &str = r#"# Kasetto - https://github.com/pivoshenko/kasetto
 #     path: .mcp.json         # explicit path to MCP JSON within the repo
 "#;
 
-pub(crate) fn run(force: bool) -> Result<()> {
+pub(crate) fn run(force: bool, global: bool) -> Result<()> {
     print_banner();
     println!();
-    let path = Path::new(DEFAULT_CONFIG_FILENAME);
+    let path = init_config_path(global)?;
 
     if path.exists() && !force {
         println!(
@@ -64,7 +65,10 @@ pub(crate) fn run(force: bool) -> Result<()> {
         }
     }
 
-    fs::write(path, TEMPLATE)?;
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    fs::write(&path, TEMPLATE)?;
 
     println!(
         "{SUCCESS}{SYM_OK}{RESET} Created {ACCENT}{}{RESET}",
@@ -80,4 +84,28 @@ pub(crate) fn run(force: bool) -> Result<()> {
     println!("  3. Run {ACCENT}kasetto sync{RESET} to install skills");
 
     Ok(())
+}
+
+fn init_config_path(global: bool) -> Result<PathBuf> {
+    if global {
+        return Ok(dirs_kasetto_config()?.join(DEFAULT_GLOBAL_CONFIG_FILENAME));
+    }
+    Ok(PathBuf::from(DEFAULT_CONFIG_FILENAME))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::init_config_path;
+
+    #[test]
+    fn init_path_defaults_to_local_config() {
+        let path = init_config_path(false).expect("local path");
+        assert_eq!(path, std::path::PathBuf::from("kasetto.yaml"));
+    }
+
+    #[test]
+    fn init_path_global_uses_kasetto_config_dir() {
+        let path = init_config_path(true).expect("global path");
+        assert!(path.ends_with("kasetto/config.yaml"));
+    }
 }

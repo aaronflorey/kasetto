@@ -2,7 +2,7 @@
 
 ## `kst init`
 
-Generates a starter `kasetto.yaml` in the current directory — a good jumping-off point before you edit by hand.
+Generates a starter config file — local `./kasetto.yaml` by default, or global config with `--global`.
 
 ```bash
 kst init [OPTIONS]
@@ -10,9 +10,10 @@ kst init [OPTIONS]
 
 ### Options
 
-| Flag      | Description                                            |
-| --------- | ------------------------------------------------------ |
-| `--force` | Overwrite an existing `kasetto.yaml` without prompting |
+| Flag       | Description                                                                       |
+| ---------- | --------------------------------------------------------------------------------- |
+| `--global` | Write `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`) |
+| `--force`  | Overwrite an existing config file without prompting                               |
 
 ## `kst sync`
 

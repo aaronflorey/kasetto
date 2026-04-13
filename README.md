@@ -105,15 +105,16 @@ kst doctor    # version, paths, last sync status
 
 ### `kst init`
 
-Generates a starter `kasetto.yaml` in the current directory.
+Generates a starter config file (`./kasetto.yaml` by default, or global config with `--global`).
 
 ```bash
-kst init [--force]
+kst init [--global] [--force]
 ```
 
-| Flag      | What it does                                        |
-| --------- | --------------------------------------------------- |
-| `--force` | Overwrite an existing `kasetto.yaml` without asking |
+| Flag       | What it does                                                                           |
+| ---------- | -------------------------------------------------------------------------------------- |
+| `--global` | Write `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)    |
+| `--force`  | Overwrite an existing config file without asking                                       |
 
 ### `kst sync`
 
@@ -204,7 +205,7 @@ When `--config` is omitted, Kasetto looks for config in this order:
 1. `./kasetto.yaml`
 2. `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)
 
-Point it at a specific file or URL with `--config`, or run `kst init` to generate a starter `kasetto.yaml` in the current directory.
+Point it at a specific file or URL with `--config`, or run `kst init` for local `./kasetto.yaml` (`kst init --global` writes the global config file).
 
 ```yaml
 # Choose an agent preset (single or multiple)...

@@ -5,7 +5,7 @@ When `--config` is omitted, Kasetto looks for config in this order:
 1. `./kasetto.yaml`
 2. `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)
 
-Point it at a specific file or URL with `--config`, or run `kst init` to generate a starter `kasetto.yaml` in the current directory.
+Point it at a specific file or URL with `--config`, or run `kst init` for local `./kasetto.yaml` (`kst init --global` writes the global config file).
 
 ## Example
 
