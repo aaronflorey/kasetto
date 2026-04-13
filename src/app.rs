@@ -11,7 +11,7 @@ pub fn run() -> Result<()> {
     let default_config = default_config_path();
     match resolve_command(cli, Path::new(&default_config).exists()) {
         StartupMode::Command(command) => match command {
-            Commands::Init { force } => crate::commands::init::run(force),
+            Commands::Init { force, global } => crate::commands::init::run(force, global),
             Commands::Sync { sync } => {
                 let config = sync.config.unwrap_or_else(|| default_config.clone());
                 crate::commands::sync::run(&crate::commands::sync::SyncOptions {

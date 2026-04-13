@@ -106,14 +106,21 @@ impl SyncArgs {
 #[derive(Subcommand)]
 pub(crate) enum Commands {
     #[command(
-        about = "Create a starter kasetto.yaml in the current directory",
-        long_about = "Writes a commented template you can edit before running sync.\n\nIf kasetto.yaml already exists, you are prompted to overwrite (TTY) unless `--force` is set.",
-        after_help = crate::cli_examples!("kasetto init", "kasetto init --force",)
+        about = "Create a starter config file",
+        long_about = "Writes a commented template you can edit before running sync.\n\nBy default, writes ./kasetto.yaml. With --global, writes $XDG_CONFIG_HOME/kasetto/config.yaml (or ~/.config/kasetto/config.yaml).\n\nIf the target file already exists, you are prompted to overwrite (TTY) unless `--force` is set.",
+        after_help = crate::cli_examples!(
+            "kasetto init",
+            "kasetto init --global",
+            "kasetto init --force",
+        )
     )]
     Init {
         #[arg(short, long)]
-        #[arg(help = "overwrite an existing kasetto.yaml without prompting")]
+        #[arg(help = "overwrite an existing config file without prompting")]
         force: bool,
+        #[arg(long)]
+        #[arg(help = "write global config to $XDG_CONFIG_HOME/kasetto/config.yaml")]
+        global: bool,
     },
     #[command(
         about = "Sync skills from configured sources",

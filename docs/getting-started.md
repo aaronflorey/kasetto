@@ -41,6 +41,8 @@ Run `kst init` to generate a starter config:
 kst init
 ```
 
+Use `kst init --global` to create `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`).
+
 Or create a `kasetto.yaml` by hand:
 
 ```yaml
