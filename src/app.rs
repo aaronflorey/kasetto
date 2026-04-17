@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::path::Path;
 
-use crate::cli::{Cli, Commands, SelfAction, SyncArgs};
+use crate::cli::{Cli, Commands, SelfAction};
 use crate::default_config_path;
 use crate::error::Result;
 
@@ -9,8 +9,8 @@ pub fn run() -> Result<()> {
     let cli = Cli::parse();
     let program_name = current_program_name();
     let default_config = default_config_path();
-    match resolve_command(cli, Path::new(&default_config).exists()) {
-        StartupMode::Command(command) => match command {
+    match cli.command {
+        Some(command) => match command {
             Commands::Init { force, global } => crate::commands::init::run(force, global),
             Commands::Sync { sync } => {
                 let config = sync.config.unwrap_or_else(|| default_config.clone());
@@ -63,23 +63,7 @@ pub fn run() -> Result<()> {
                 crate::commands::completions::run(shell, &program_name)
             }
         },
-        StartupMode::Home => crate::home::run(&program_name, &default_config),
-    }
-}
-
-enum StartupMode {
-    Command(Commands),
-    Home,
-}
-
-fn resolve_command(cli: Cli, default_config_exists: bool) -> StartupMode {
-    match (cli.command, cli.sync) {
-        (Some(command), _) => StartupMode::Command(command),
-        (None, sync) if sync.is_present() => StartupMode::Command(Commands::Sync { sync }),
-        (None, _) if default_config_exists => StartupMode::Command(Commands::Sync {
-            sync: SyncArgs::default(),
-        }),
-        (None, _) => StartupMode::Home,
+        None => crate::home::run(&program_name, &default_config),
     }
 }
 
@@ -93,65 +77,4 @@ fn current_program_name() -> String {
         })
         .filter(|name| !name.is_empty())
         .unwrap_or_else(|| "kasetto".to_string())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn resolves_to_home_without_command_and_without_default_config() {
-        // When no default config exists, should go to Home
-        let cli = Cli {
-            sync: SyncArgs::default(),
-            command: None,
-        };
-        match resolve_command(cli, false) {
-            StartupMode::Home => {}
-            _ => panic!("expected Home startup mode"),
-        }
-    }
-
-    #[test]
-    fn resolves_to_default_sync_with_default_config() {
-        let cli = Cli {
-            sync: SyncArgs::default(),
-            command: None,
-        };
-        match resolve_command(cli, true) {
-            StartupMode::Command(Commands::Sync { sync }) => {
-                assert_eq!(sync.config, None);
-                assert!(!sync.dry_run);
-                assert!(!sync.quiet);
-                assert!(!sync.json);
-                assert!(!sync.plain);
-                assert!(!sync.verbose);
-            }
-            _ => panic!("expected default sync command"),
-        }
-    }
-
-    #[test]
-    fn resolves_root_sync_flags_to_sync_command() {
-        let cli = Cli {
-            sync: SyncArgs {
-                config: Some("remote.yaml".into()),
-                dry_run: true,
-                quiet: false,
-                json: false,
-                plain: false,
-                verbose: true,
-                scope: Default::default(),
-            },
-            command: None,
-        };
-        match resolve_command(cli, false) {
-            StartupMode::Command(Commands::Sync { sync }) => {
-                assert_eq!(sync.config.as_deref(), Some("remote.yaml"));
-                assert!(sync.dry_run);
-                assert!(sync.verbose);
-            }
-            _ => panic!("expected root sync flags to resolve to sync"),
-        }
-    }
 }

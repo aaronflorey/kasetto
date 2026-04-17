@@ -8,13 +8,11 @@ use crate::model::Scope;
     name = "kasetto",
     version,
     color = clap::ColorChoice::Always,
-    args_conflicts_with_subcommands = true,
     styles = crate::colors::clap_styles(),
     about = "sync and maintain local AI skill packs",
     long_about = "A declarative AI agent environment manager, written in Rust.",
     after_help = crate::cli_examples!(
         "kasetto",
-        "kasetto --config kasetto.yaml --dry-run",
         "kasetto sync --config https://example.com/kasetto.yaml --verbose",
         "kasetto init",
         "kasetto list",
@@ -22,8 +20,6 @@ use crate::model::Scope;
     )
 )]
 pub(crate) struct Cli {
-    #[command(flatten)]
-    pub sync: SyncArgs,
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -88,19 +84,6 @@ pub(crate) struct SyncArgs {
     pub verbose: bool,
     #[command(flatten)]
     pub scope: ScopeArgs,
-}
-
-impl SyncArgs {
-    pub(crate) fn is_present(&self) -> bool {
-        self.config.is_some()
-            || self.dry_run
-            || self.quiet
-            || self.json
-            || self.plain
-            || self.verbose
-            || self.scope.project
-            || self.scope.global
-    }
 }
 
 #[derive(Subcommand)]
