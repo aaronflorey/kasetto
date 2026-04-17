@@ -22,11 +22,9 @@ Kasetto is a single-binary CLI tool that syncs AI agent skills from GitHub repos
 ### Startup Routing (`app.rs`)
 
 ```
-CLI args → resolve_command() → StartupMode
+CLI args → match cli.command
   ├─ Explicit subcommand → run that command
-  ├─ Root sync flags (--config, --dry-run, etc.) → Sync
-  ├─ default config exists (`./kasetto.yaml` or `~/.config/kasetto/config.yaml`) → Sync
-  └─ Nothing → Home screen (interactive TUI menu)
+  └─ None → Home screen (interactive TUI menu)
 ```
 
 ### Module Layout
