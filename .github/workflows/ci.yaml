@@ -20,10 +20,10 @@ jobs:
         uses: taiki-e/install-action@just
 
       - name: Run linters
-        run: just lint
+        run: just lint-rs
 
       - name: Run tests
         run: just test
 
       - name: Build
-        run: just build
+        run: just build-rs
