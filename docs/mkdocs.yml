@@ -1,5 +1,6 @@
 site_name: Kasetto
 docs_dir: .
+site_dir: ../site
 site_url: https://docs.kasetto.dev
 site_description: A declarative AI agent environment manager, written in Rust.
 repo_url: https://github.com/pivoshenko/kasetto
