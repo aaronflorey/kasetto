@@ -2,11 +2,58 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2026-04-19
+
+### Bug fixes
+
+- **lint**: Use sort_by_key instead of sort_by for clippy 1.95 compatibility
+
+### CI/CD
+
+- Move site_dir outside docs_dir to fix mkdocs nested build error
+- Set docs_dir to current directory in mkdocs.yml
+- Correct custom_dir path in mkdocs.yml
+- Use uv pip install --system for mkdocs build on Vercel
+- Scope lint and build steps to Rust-only recipes
+- Extend list of commands
+- Add .gitignore
+
+### Documentation
+
+- Update startup routing diagram after root-level sync flag removal
+- Update Vercel config
+- Unify install URLs and fix doc alignment
+- Extend "Why Kasetto" section
+- Add landing page
+
+### Features
+
+- **config**: Add KASETTO_CONFIG env var, preferences file, and rename global config
+- **init**: Add --global config scaffold option
+- **config**: Add global default config fallback
+
+### Refactor
+
+- **cli**: Remove root-level sync flags, always show TUI on bare kst
+- Run linters
+
+### Testing
+
+- **config**: Add unit tests for config resolution priority logic
+
+### Style
+
+- Run formatters
+
 ## [2.0.1] - 2026-04-06
 
 ### Miscellaneous
 
 - Rebrand description and bump version to 2.0.1
+
+### Release
+
+- V2.0.1
 
 ## [2.0.0] - 2026-04-06
 
