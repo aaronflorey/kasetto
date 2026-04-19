@@ -113,7 +113,7 @@ kst init [--global] [--force]
 
 | Flag       | What it does                                                                           |
 | ---------- | -------------------------------------------------------------------------------------- |
-| `--global` | Write `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)    |
+| `--global` | Write `$XDG_CONFIG_HOME/kasetto/kasetto.yaml` (or `~/.config/kasetto/kasetto.yaml`)    |
 | `--force`  | Overwrite an existing config file without asking                                       |
 
 ### `kst sync`
@@ -126,7 +126,7 @@ kst sync [--config <path-or-url>] [--dry-run] [--quiet] [--json] [--plain] [--ve
 
 | Flag        | What it does                                                 |
 | ----------- | ------------------------------------------------------------ |
-| `--config`  | Path or HTTPS URL to a YAML config (default order: `./kasetto.yaml`, then `$XDG_CONFIG_HOME/kasetto/config.yaml`) |
+| `--config`  | Path or HTTPS URL to a YAML config (default order: `$KASETTO_CONFIG`, saved preference, `./kasetto.yaml`, `$XDG_CONFIG_HOME/kasetto/kasetto.yaml`) |
 | `--dry-run` | Preview what would change without writing anything           |
 | `--quiet`   | Suppress non-error output                                    |
 | `--json`    | Print the sync report as JSON                                |
@@ -202,10 +202,13 @@ Supported shells: `bash`, `zsh`, `fish`, `powershell`.
 
 When `--config` is omitted, Kasetto looks for config in this order:
 
-1. `./kasetto.yaml`
-2. `$XDG_CONFIG_HOME/kasetto/config.yaml` (or `~/.config/kasetto/config.yaml`)
+1. `$KASETTO_CONFIG` env var
+2. `source:` key in `$XDG_CONFIG_HOME/kasetto/config.yaml`
+3. `./kasetto.yaml`
+4. `$XDG_CONFIG_HOME/kasetto/kasetto.yaml` (or `~/.config/kasetto/kasetto.yaml`)
 
 Point it at a specific file or URL with `--config`, or run `kst init` for local `./kasetto.yaml` (`kst init --global` writes the global config file).
+To persist a remote URL as your default, add a `source:` key to `~/.config/kasetto/config.yaml`.
 
 ```yaml
 # Choose an agent preset (single or multiple)...

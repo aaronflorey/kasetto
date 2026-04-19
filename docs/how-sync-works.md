@@ -5,7 +5,7 @@ A look at what `kst sync` actually does — how skills are installed, how MCP co
 ## Sync Flow
 
 ```
-1. Load config (`./kasetto.yaml`, then `$XDG_CONFIG_HOME/kasetto/config.yaml`, or `--config` path/URL)
+1. Load config (`$KASETTO_CONFIG` → saved preference → `./kasetto.yaml` → `$XDG_CONFIG_HOME/kasetto/kasetto.yaml`, or explicit `--config` path/URL)
 2. Load lock file (kasetto.lock)
 3. Sync skills
    a. For each skill source: materialize (download if remote)

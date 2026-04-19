@@ -106,6 +106,6 @@ mod tests {
     #[test]
     fn init_path_global_uses_kasetto_config_dir() {
         let path = init_config_path(true).expect("global path");
-        assert!(path.ends_with("kasetto/config.yaml"));
+        assert!(path.ends_with("kasetto/kasetto.yaml"));
     }
 }

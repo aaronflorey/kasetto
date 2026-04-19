@@ -107,6 +107,7 @@ pub(crate) fn run(opts: &SyncOptions) -> Result<()> {
     Ok(())
 }
 
+
 fn print_sync_summary(report: &Report, plain: bool, verbose: bool) {
     // Column widths align labels and right-align counts across the two summary rows.
     const L1: usize = 12;

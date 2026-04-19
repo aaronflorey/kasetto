@@ -64,7 +64,7 @@ pub(crate) struct SyncArgs {
     #[arg(long)]
     #[arg(
         help = "config path or HTTP(S) URL",
-        long_help = "Configuration location. Supports:\n- local file path\n- HTTP(S) URL to a YAML config file\n\nWhen omitted, kasetto checks defaults in this order:\n1) ./kasetto.yaml\n2) $XDG_CONFIG_HOME/kasetto/config.yaml (or ~/.config/kasetto/config.yaml)"
+        long_help = "Configuration location. Supports:\n- local file path\n- HTTP(S) URL to a YAML config file\n\nWhen omitted, kasetto checks defaults in this order:\n1) $KASETTO_CONFIG env var\n2) source: key in $XDG_CONFIG_HOME/kasetto/config.yaml\n3) ./kasetto.yaml\n4) $XDG_CONFIG_HOME/kasetto/kasetto.yaml (or ~/.config/kasetto/kasetto.yaml)"
     )]
     pub config: Option<String>,
     #[arg(long)]
@@ -90,7 +90,7 @@ pub(crate) struct SyncArgs {
 pub(crate) enum Commands {
     #[command(
         about = "Create a starter config file",
-        long_about = "Writes a commented template you can edit before running sync.\n\nBy default, writes ./kasetto.yaml. With --global, writes $XDG_CONFIG_HOME/kasetto/config.yaml (or ~/.config/kasetto/config.yaml).\n\nIf the target file already exists, you are prompted to overwrite (TTY) unless `--force` is set.",
+        long_about = "Writes a commented template you can edit before running sync.\n\nBy default, writes ./kasetto.yaml. With --global, writes $XDG_CONFIG_HOME/kasetto/kasetto.yaml (or ~/.config/kasetto/kasetto.yaml).\n\nIf the target file already exists, you are prompted to overwrite (TTY) unless `--force` is set.",
         after_help = crate::cli_examples!(
             "kasetto init",
             "kasetto init --global",
@@ -102,7 +102,7 @@ pub(crate) enum Commands {
         #[arg(help = "overwrite an existing config file without prompting")]
         force: bool,
         #[arg(long)]
-        #[arg(help = "write global config to $XDG_CONFIG_HOME/kasetto/config.yaml")]
+        #[arg(help = "write global config to $XDG_CONFIG_HOME/kasetto/kasetto.yaml")]
         global: bool,
     },
     #[command(
