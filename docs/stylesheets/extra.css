@@ -15,14 +15,14 @@
 
 [data-md-color-scheme="kasetto-dark"] {
   --md-default-bg-color: var(--kst-bg);
-  --md-default-fg-color: #ffffff;
-  --md-default-fg-color--light: #ffffff;
-  --md-default-fg-color--lighter: #ffffff;
+  --md-default-fg-color: #e7e5e4;
+  --md-default-fg-color--light: #d6d3d1;
+  --md-default-fg-color--lighter: #a8a29e;
   --md-default-fg-color--lightest: rgba(255, 255, 255, 0.5);
   --md-primary-fg-color: var(--kst-surface);
   --md-primary-bg-color: #ffffff;
   --md-accent-fg-color: var(--kst-purple);
-  --md-typeset-color: #ffffff;
+  --md-typeset-color: #e7e5e4;
   --md-typeset-a-color: var(--kst-pink);
   --md-typeset-mark-color: #ffac2f;
   --md-code-fg-color: #ffffff;
