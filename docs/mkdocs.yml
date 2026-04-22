@@ -81,10 +81,9 @@ plugins:
   - search
 
 nav:
-  - Introduction: index.md
   - Getting Started:
+      - Quick Start: index.md
       - Installation: installation.md
-      - Quick Start: getting-started.md
   - Reference:
       - Configuration: configuration.md
       - Commands: commands.md

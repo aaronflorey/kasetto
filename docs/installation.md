@@ -146,4 +146,4 @@ Then restart your shell or source the config file.
 
 ## Next Steps
 
-Check out the [quick start](./getting-started.md), or jump straight to the [configuration reference](./configuration.md) if you already know what you want.
+Check out the [quick start](./index.md), or jump straight to the [configuration reference](./configuration.md) if you already know what you want.
