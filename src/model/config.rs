@@ -77,6 +77,10 @@ pub(crate) struct SourceSpec {
     /// When set, no main/master fallback is attempted.
     #[serde(rename = "ref")]
     pub git_ref: Option<String>,
+    /// Optional subdirectory inside the source repo/path to use as the skill root.
+    /// Supports both `sub-dir` and `sub_dir` YAML keys.
+    #[serde(default, rename = "sub-dir", alias = "sub_dir")]
+    pub sub_dir: Option<String>,
     pub skills: SkillsField,
 }
 
@@ -120,6 +124,7 @@ impl McpSourceSpec {
             source: self.source.clone(),
             branch: self.branch.clone(),
             git_ref: self.git_ref.clone(),
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".to_string()),
         }
     }
