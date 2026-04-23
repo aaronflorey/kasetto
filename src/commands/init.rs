@@ -20,6 +20,17 @@ const TEMPLATE: &str = r#"# Kasetto - https://github.com/pivoshenko/kasetto
 # Or set a custom skills directory
 # destination: ~/.claude/skills
 
+# Global/shared presets you can include from repo configs
+# presets:
+#   - name: team-core
+#     skills:
+#       - source: https://github.com/example/skill-pack
+#         skills: "*"
+
+# Include presets from this file or your global config
+# include_presets:
+#   - team-core
+
 # skills:
 #   - source: https://github.com/example/skill-pack
 #     skills: "*"
