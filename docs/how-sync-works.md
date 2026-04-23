@@ -24,11 +24,15 @@ A look at what `kst sync` actually does — how skills are installed, how MCP co
 
 Skills are plain directories with a `SKILL.md` file (see [writing skills](./writing-skills.md)). On each sync, Kasetto:
 
-- **Discovers** skills by scanning the source root and `skills/` subdirectory for directories
-  that contain a `SKILL.md` file.
+- **Resolves** the source root (optionally via `sub-dir`).
+- **Discovers** skills from:
+  - top-level `SKILL.md` in the resolved root,
+  - root-level subdirectories with `SKILL.md`, and
+  - `skills/<name>/SKILL.md`.
 - **Hashes** the source skill directory.
 - **Compares** the hash to the lock file. If unchanged, the skill is skipped.
-- **Copies** the entire directory to the destination, replacing any previous version.
+- **Copies** the entire directory to the destination, replacing any previous version (including
+  symlinked files/directories inside the skill).
 - **Removes** skill directories that are no longer listed in the config.
 
 Skills are fully replaced on update — no partial merges.
