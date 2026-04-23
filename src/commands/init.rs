@@ -27,6 +27,10 @@ const TEMPLATE: &str = r#"# Kasetto - https://github.com/pivoshenko/kasetto
 #       - source: https://github.com/example/skill-pack
 #         skills: "*"
 
+# Remote config files that define additional presets
+# preset_configs:
+#   - https://github.com/example/team-config/blob/main/kasetto.yaml
+
 # Include presets from this file or your global config
 # include_presets:
 #   - team-core

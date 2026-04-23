@@ -81,6 +81,55 @@ fn gitea_archive_tarball_url(host: &str, owner: &str, repo: &str, branch: &str) 
     format!("https://{host}/{owner}/{repo}/archive/{branch}.tar.gz")
 }
 
+pub(crate) fn normalize_remote_yaml_url(url: &str) -> Result<String> {
+    let parsed = reqwest::Url::parse(url)
+        .map_err(|e| err(format!("invalid remote config URL: {url}: {e}")))?;
+
+    match parsed.scheme() {
+        "http" | "https" => {}
+        scheme => {
+            return Err(err(format!(
+                "remote config URL must use http or https: {url} (got {scheme})"
+            )));
+        }
+    }
+
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| err(format!("remote config URL is missing a host: {url}")))?;
+    if !has_yaml_extension(parsed.path()) {
+        return Err(err(format!(
+            "remote config URL must point to a .yml or .yaml file: {url}"
+        )));
+    }
+
+    if matches!(
+        host,
+        "raw.githubusercontent.com" | "www.raw.githubusercontent.com"
+    ) {
+        return Ok(parsed.to_string());
+    }
+
+    if let Some(rewritten) = rewrite_browse_to_raw_url(url) {
+        return Ok(rewritten);
+    }
+
+    if matches!(host, "github.com" | "www.github.com") {
+        return Err(err(format!(
+            "GitHub remote config URLs must use /blob/, /raw/, or raw.githubusercontent.com and point to a .yml or .yaml file: {url}"
+        )));
+    }
+
+    Ok(parsed.to_string())
+}
+
+fn has_yaml_extension(path: &str) -> bool {
+    path.rsplit('/').next().is_some_and(|name| {
+        let lower = name.to_ascii_lowercase();
+        lower.ends_with(".yml") || lower.ends_with(".yaml")
+    })
+}
+
 /// Rewrite browser-style URLs (e.g. `/blob/`, `/src/branch/`) to the raw-content
 /// equivalent so users can paste a URL straight from their browser into
 /// `--config` or skill sources.
@@ -100,7 +149,7 @@ pub(crate) fn rewrite_browse_to_raw_url(url: &str) -> Option<String> {
     let without_scheme = &cleaned[scheme_len..];
     let (host, rest) = without_scheme.split_once('/')?;
 
-    if host == "github.com" {
+    if matches!(host, "github.com" | "www.github.com") {
         if let Some(rewritten) = rewrite_github_blob(rest) {
             return Some(rewritten);
         }
@@ -114,7 +163,16 @@ pub(crate) fn rewrite_browse_to_raw_url(url: &str) -> Option<String> {
         return None;
     }
 
-    rewrite_gitlab_raw_url(host, rest)
+    rewrite_gitlab_raw_path(host, rest)
+}
+
+pub(crate) fn rewrite_gitlab_raw_url(url: &str) -> Option<String> {
+    let cleaned = url.split('?').next().unwrap_or(url);
+    let without_scheme = cleaned
+        .strip_prefix("https://")
+        .or_else(|| cleaned.strip_prefix("http://"))?;
+    let (host, rest) = without_scheme.split_once('/')?;
+    rewrite_gitlab_raw_path(host, rest)
 }
 
 fn rewrite_github_blob(rest: &str) -> Option<String> {
@@ -159,7 +217,7 @@ fn rewrite_gitea_src(scheme: &str, host: &str, rest: &str, query: Option<&str>) 
     Some(out)
 }
 
-fn rewrite_gitlab_raw_url(host: &str, rest: &str) -> Option<String> {
+fn rewrite_gitlab_raw_path(host: &str, rest: &str) -> Option<String> {
     for marker in ["/-/raw/", "/-/blob/"] {
         if let Some(idx) = rest.find(marker) {
             let project = &rest[..idx];
@@ -366,5 +424,57 @@ mod tests {
     #[test]
     fn rewrite_skips_non_http_scheme() {
         assert!(rewrite_browse_to_raw_url("git@github.com:owner/repo.git").is_none());
+    }
+
+    #[test]
+    fn normalize_remote_yaml_url_rewrites_github_blob() {
+        let url = normalize_remote_yaml_url(
+            "https://github.com/acme/team/blob/main/config/kasetto.yaml?raw=1",
+        )
+        .expect("normalize");
+        assert_eq!(
+            url,
+            "https://raw.githubusercontent.com/acme/team/main/config/kasetto.yaml"
+        );
+    }
+
+    #[test]
+    fn normalize_remote_yaml_url_accepts_raw_github() {
+        let url = normalize_remote_yaml_url(
+            "https://raw.githubusercontent.com/acme/team/main/config/kasetto.yml",
+        )
+        .expect("normalize");
+        assert_eq!(
+            url,
+            "https://raw.githubusercontent.com/acme/team/main/config/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn normalize_remote_yaml_url_rejects_non_yaml_paths() {
+        let err = normalize_remote_yaml_url("https://example.com/config.json").expect_err("reject");
+        assert!(err.to_string().contains(".yml or .yaml"));
+    }
+
+    #[test]
+    fn normalize_remote_yaml_url_rejects_non_blob_github_urls() {
+        let err =
+            normalize_remote_yaml_url("https://github.com/acme/team/tree/main/config/kasetto.yaml")
+                .expect_err("reject");
+        assert!(err
+            .to_string()
+            .contains("must use /blob/, /raw/, or raw.githubusercontent.com"));
+    }
+
+    #[test]
+    fn normalize_remote_yaml_url_rewrites_gitlab_blob() {
+        let url = normalize_remote_yaml_url(
+            "https://gitlab.example.com/group/repo/-/blob/main/kasetto.yaml",
+        )
+        .expect("normalize");
+        assert_eq!(
+            url,
+            "https://gitlab.example.com/api/v4/projects/group%2Frepo/repository/files/kasetto.yaml/raw?ref=main"
+        );
     }
 }

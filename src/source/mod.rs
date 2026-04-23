@@ -7,6 +7,7 @@ mod remote;
 
 pub(crate) use auth::{auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint};
 pub(crate) use remote::rewrite_browse_to_raw_url;
+pub(crate) use remote::normalize_remote_yaml_url;
 
 use std::collections::HashMap;
 use std::fs;
