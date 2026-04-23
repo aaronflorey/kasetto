@@ -25,6 +25,8 @@ pub(crate) struct Config {
     #[serde(default)]
     pub presets: Vec<PresetDefinition>,
     #[serde(default)]
+    pub preset_configs: Vec<String>,
+    #[serde(default)]
     pub include_presets: Vec<String>,
     #[serde(default)]
     pub skills: Vec<SourceSpec>,
@@ -76,9 +78,7 @@ impl Config {
     }
 }
 
-fn preset_map<'a>(
-    presets: &'a [PresetDefinition],
-) -> Result<HashMap<String, &'a PresetDefinition>> {
+fn preset_map(presets: &[PresetDefinition]) -> Result<HashMap<String, &PresetDefinition>> {
     let mut available = HashMap::new();
     for preset in presets {
         if available.insert(preset.name.clone(), preset).is_some() {
