@@ -243,6 +243,11 @@ skills:
       - name: custom-skill
         path: tools/skills
 
+  # Scope discovery to a nested directory inside the source
+  - source: https://github.com/acme/agents
+    sub-dir: plugins/swift-apple-expert
+    skills: "*"
+
 # MCP servers (optional)
 mcps:
   - source: https://github.com/org/mcp-pack
@@ -259,6 +264,7 @@ mcps:
 | `skills[].source` | **yes**  | Git host URL or local path                                          |
 | `skills[].branch` | no       | Branch for remote sources (default: `main`, falls back to `master`) |
 | `skills[].ref`    | no       | Git tag, commit SHA, or ref (takes priority over `branch`)          |
+| `skills[].sub-dir`| no       | Relative subdirectory to use as source root (`sub_dir` alias also supported) |
 | `skills[].skills` | **yes**  | `"*"` for all, or a list of names / `{ name, path }` objects        |
 | `mcps`            | no       | List of MCP server sources                                          |
 | `mcps[].source`   | **yes**  | Git host URL or local path containing MCP config                    |

@@ -44,6 +44,11 @@ skills:
       - name: custom-skill
         path: tools/skills
 
+  # Limit discovery to a nested directory inside the source
+  - source: https://github.com/acme/agents
+    sub-dir: plugins/swift-apple-expert
+    skills: "*"
+
 # MCP servers (optional)
 mcps:
   - source: https://github.com/org/mcp-pack
@@ -65,12 +70,13 @@ mcps:
 
 ### Skill Source Fields
 
-| Key      | Required | Description                                                            |
-| -------- | -------- | ---------------------------------------------------------------------- |
-| `source` | **yes**  | Git host URL or local path (GitHub, GitLab, Bitbucket, Codeberg/Gitea) |
-| `branch` | no       | Branch for remote sources (default: `main`, falls back to `master`)    |
-| `ref`    | no       | Git tag, commit SHA, or ref - takes priority over `branch`             |
-| `skills` | **yes**  | `"*"` for all, or a list of names / `{ name, path }` objects           |
+| Key       | Required | Description                                                            |
+| --------- | -------- | ---------------------------------------------------------------------- |
+| `source`  | **yes**  | Git host URL or local path (GitHub, GitLab, Bitbucket, Codeberg/Gitea) |
+| `branch`  | no       | Branch for remote sources (default: `main`, falls back to `master`)    |
+| `ref`     | no       | Git tag, commit SHA, or ref - takes priority over `branch`             |
+| `sub-dir` | no       | Relative subdirectory within the source used as the discovery root (`sub_dir` alias supported) |
+| `skills`  | **yes**  | `"*"` for all, or a list of names / `{ name, path }` objects           |
 
 ### Skill Entry Fields
 

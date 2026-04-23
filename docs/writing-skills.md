@@ -4,10 +4,11 @@ Skills are just directories with a `SKILL.md` file inside. Here's how to structu
 
 ## Directory Layout
 
-Kasetto looks in two places within a source:
+Kasetto discovers skills from the source root and from `skills/`:
 
 ```
 repo-root/
+├── SKILL.md                ← discovered as repo-name skill
 ├── my-skill/
 │   └── SKILL.md        ← discovered
 ├── skills/
@@ -18,7 +19,13 @@ repo-root/
 └── README.md           ← ignored (no SKILL.md)
 ```
 
-Any subdirectory at the root or inside `skills/` that contains a `SKILL.md` is picked up as a skill. The directory name is used as the skill's identifier.
+Kasetto picks up:
+
+- A top-level `SKILL.md` (installed using the repo name, or `sub-dir` basename).
+- Any root-level subdirectory containing `SKILL.md`.
+- Any `skills/<name>/SKILL.md` subdirectory.
+
+Directory names are used as skill identifiers for folder-based skills.
 
 !!! important
 
@@ -95,3 +102,16 @@ skills:
       - name: my-skill
         path: tools/ai-skills    # looks in tools/ai-skills/my-skill/SKILL.md
 ```
+
+## Limiting Discovery to a Nested Directory
+
+If your skills live under a nested plugin folder, set `sub-dir` on the source:
+
+```yaml
+skills:
+  - source: https://github.com/acme/agents
+    sub-dir: plugins/swift-apple-expert
+    skills: "*"
+```
+
+Kasetto treats `plugins/swift-apple-expert` as the source root for discovery.
