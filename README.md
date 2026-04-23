@@ -211,6 +211,8 @@ When `--config` is omitted, Kasetto looks for config in this order:
 Point it at a specific file or URL with `--config`, or run `kst init` for local `./kasetto.yaml` (`kst init --global` writes the global config file).
 To persist a remote URL as your default, add a `source:` key to `~/.config/kasetto/config.yaml`.
 
+You can also define reusable `presets` in the global config and pull them into a repo config with `include_presets`.
+
 ```yaml
 # Choose an agent preset (single or multiple)...
 agent: codex
@@ -223,6 +225,17 @@ agent: codex
 
 # Install scope: "global" (default) or "project"
 # scope: project
+
+# Reusable preset definitions, typically in ~/.config/kasetto/kasetto.yaml
+# presets:
+#   - name: team-core
+#     skills:
+#       - source: https://github.com/org/shared-skills
+#         skills: "*"
+
+# Include preset definitions from this file or your global config
+# include_presets:
+#   - team-core
 
 skills:
   # Pull specific skills from a GitHub repo
@@ -260,7 +273,11 @@ mcps:
 | `agent`           | no       | One or more [supported agent presets](#supported-agents)            |
 | `destination`     | no       | Explicit install path - overrides `agent` if both are set           |
 | `scope`           | no       | `"global"` (default) or `"project"` - where to install              |
+| `presets`         | no       | Named reusable skill source groups, usually defined in the global config |
+| `include_presets` | no       | Preset names to prepend from the repo config and/or global config   |
 | `skills`          | **yes**  | List of skill sources                                               |
+| `presets[].name`  | **yes**  | Preset name referenced from `include_presets`                       |
+| `presets[].skills` | **yes** | Skill source list using the same shape as top-level `skills`        |
 | `skills[].source` | **yes**  | Git host URL or local path                                          |
 | `skills[].branch` | no       | Branch for remote sources (default: `main`, falls back to `master`) |
 | `skills[].ref`    | no       | Git tag, commit SHA, or ref (takes priority over `branch`)          |

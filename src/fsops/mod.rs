@@ -16,10 +16,11 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::error::{err, Result};
-use crate::model::{Config, Scope, SkillTarget, SkillsField};
+use crate::model::{Config, PresetDefinition, Scope, SkillTarget, SkillsField};
 use crate::source::{
     auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, rewrite_browse_to_raw_url,
 };
+use crate::DEFAULT_GLOBAL_CONFIG_FILENAME;
 
 pub(crate) fn load_config_any(config_path: &str) -> Result<(Config, PathBuf, String)> {
     if config_path.starts_with("http://") || config_path.starts_with("https://") {
@@ -53,21 +54,53 @@ pub(crate) fn load_config_any(config_path: &str) -> Result<(Config, PathBuf, Str
                 auth_env_inline_help(config_path)
             )));
         }
-        let cfg: Config = serde_yaml::from_str(&text)?;
+        let mut cfg: Config = serde_yaml::from_str(&text)?;
         let cfg_dir = std::env::current_dir()
             .map_err(|e| err(format!("failed to get current directory: {e}")))?;
+        expand_config_presets(&mut cfg, None)?;
         return Ok((cfg, cfg_dir, config_path.to_string()));
     }
 
     let cfg_abs = fs::canonicalize(config_path)
         .map_err(|_| err(format!("config not found: {config_path}")))?;
     let cfg_text = fs::read_to_string(&cfg_abs)?;
-    let cfg: Config = serde_yaml::from_str(&cfg_text)?;
+    let mut cfg: Config = serde_yaml::from_str(&cfg_text)?;
+    expand_config_presets(&mut cfg, Some(&cfg_abs))?;
     let cfg_dir = cfg_abs
         .parent()
         .map(Path::to_path_buf)
         .ok_or_else(|| err("invalid config path"))?;
     Ok((cfg, cfg_dir, cfg_abs.to_string_lossy().to_string()))
+}
+
+fn expand_config_presets(cfg: &mut Config, current_config_path: Option<&Path>) -> Result<()> {
+    if cfg.include_presets.is_empty() {
+        return Ok(());
+    }
+
+    let global_presets = load_global_presets(current_config_path)?;
+    cfg.expand_included_presets(&global_presets)
+}
+
+fn load_global_presets(current_config_path: Option<&Path>) -> Result<Vec<PresetDefinition>> {
+    let global_path = dirs_kasetto_config()?.join(DEFAULT_GLOBAL_CONFIG_FILENAME);
+    if !global_path.exists() {
+        return Ok(Vec::new());
+    }
+
+    let global_path = fs::canonicalize(&global_path).unwrap_or(global_path);
+    if current_config_path == Some(global_path.as_path()) {
+        return Ok(Vec::new());
+    }
+
+    let text = fs::read_to_string(&global_path)?;
+    let cfg: Config = serde_yaml::from_str(&text).map_err(|e| {
+        err(format!(
+            "failed to parse global config presets from {}: {e}",
+            global_path.display()
+        ))
+    })?;
+    Ok(cfg.presets)
 }
 
 pub(crate) type TargetSelection = (Vec<(String, PathBuf)>, Vec<BrokenSkill>);
@@ -233,6 +266,12 @@ mod tests {
     use super::*;
     use crate::model::{Agent, AgentField, Config, GitPin, SkillTarget, SkillsField};
     use std::path::Path;
+    use std::sync::{Mutex, OnceLock};
+
+    fn env_lock() -> &'static Mutex<()> {
+        static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+        LOCK.get_or_init(|| Mutex::new(()))
+    }
 
     #[test]
     fn select_targets_reports_missing_skill() {
@@ -315,6 +354,68 @@ mod tests {
             Some(AgentField::Many(vec![Agent::ClaudeCode, Agent::Cursor]))
         );
         assert_eq!(multi.agents(), vec![Agent::ClaudeCode, Agent::Cursor]);
+    }
+
+    #[test]
+    fn load_config_any_expands_include_presets_from_global_config() {
+        let _guard = env_lock().lock().expect("env lock");
+        let root = temp_dir("kasetto-presets-load");
+        let home = root.join("home");
+        let xdg_config = root.join("xdg-config");
+        let global_dir = xdg_config.join("kasetto");
+        let repo_dir = root.join("repo");
+        let repo_config = repo_dir.join("kasetto.yaml");
+
+        fs::create_dir_all(&global_dir).expect("create global dir");
+        fs::create_dir_all(&repo_dir).expect("create repo dir");
+        fs::write(
+            global_dir.join("kasetto.yaml"),
+            r#"
+presets:
+  - name: team-core
+    skills:
+      - source: https://github.com/example/team
+        skills: "*"
+"#,
+        )
+        .expect("write global config");
+        fs::write(
+            &repo_config,
+            r#"
+agent: cursor
+include_presets:
+  - team-core
+skills:
+  - source: ~/repo-skills
+    skills: "*"
+"#,
+        )
+        .expect("write repo config");
+
+        let old_home = std::env::var_os("HOME");
+        let old_xdg = std::env::var_os("XDG_CONFIG_HOME");
+        std::env::set_var("HOME", &home);
+        std::env::set_var("XDG_CONFIG_HOME", &xdg_config);
+
+        let (cfg, cfg_dir, cfg_label) =
+            load_config_any(&repo_config.to_string_lossy()).expect("load config with presets");
+
+        match old_home {
+            Some(value) => std::env::set_var("HOME", value),
+            None => std::env::remove_var("HOME"),
+        }
+        match old_xdg {
+            Some(value) => std::env::set_var("XDG_CONFIG_HOME", value),
+            None => std::env::remove_var("XDG_CONFIG_HOME"),
+        }
+
+        assert_eq!(cfg_dir, repo_dir);
+        assert_eq!(cfg_label, repo_config.to_string_lossy());
+        assert_eq!(cfg.skills.len(), 2);
+        assert_eq!(cfg.skills[0].source, "https://github.com/example/team");
+        assert_eq!(cfg.skills[1].source, "~/repo-skills");
+
+        let _ = fs::remove_dir_all(&root);
     }
 
     #[test]
