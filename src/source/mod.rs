@@ -16,6 +16,19 @@ use crate::error::{err, Result};
 use crate::fsops::resolve_path;
 use crate::model::{GitPin, SourceSpec};
 
+fn repo_name_hint(parsed: &parse::RepoUrl) -> String {
+    match parsed {
+        parse::RepoUrl::GitHub { repo, .. } => repo.clone(),
+        parse::RepoUrl::GitLab { project_path, .. } => project_path
+            .split('/')
+            .next_back()
+            .unwrap_or(project_path)
+            .to_string(),
+        parse::RepoUrl::Bitbucket { repo_slug, .. } => repo_slug.clone(),
+        parse::RepoUrl::Gitea { repo, .. } => repo.clone(),
+    }
+}
+
 pub(crate) fn materialize_source(
     src: &SourceSpec,
     cfg_dir: &Path,
@@ -48,7 +61,8 @@ pub(crate) fn materialize_source(
             }
         };
 
-        let available = discover(stage)?;
+        let hint = repo_name_hint(&parsed);
+        let available = discover_with_root_name(stage, Some(hint.as_str()))?;
         Ok(MaterializedSource {
             source_revision,
             available,
@@ -72,7 +86,20 @@ pub(crate) struct MaterializedSource {
 }
 
 pub(crate) fn discover(root: &Path) -> Result<HashMap<String, PathBuf>> {
+    let root_name = root.file_name().and_then(|name| name.to_str());
+    discover_with_root_name(root, root_name)
+}
+
+fn discover_with_root_name(
+    root: &Path,
+    root_name: Option<&str>,
+) -> Result<HashMap<String, PathBuf>> {
     let mut out = HashMap::new();
+    if root.join("SKILL.md").is_file() {
+        if let Some(name) = root_name.filter(|name| !name.is_empty()) {
+            out.insert(name.to_string(), root.to_path_buf());
+        }
+    }
     discover_skills_in_subdir(root, &mut out)?;
     discover_skills_in_subdir(&root.join("skills"), &mut out)?;
     Ok(out)
@@ -174,6 +201,38 @@ mod tests {
 
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&stage);
+    }
+
+    #[test]
+    fn discover_supports_root_level_skill_with_hint() {
+        let root = temp_dir("kasetto-root-skill");
+        fs::create_dir_all(&root).expect("create dirs");
+        fs::write(root.join("SKILL.md"), "# Root\n\nDesc\n").expect("write skill");
+
+        let available =
+            discover_with_root_name(&root, Some("raycast-script-creator")).expect("discover");
+        assert!(available.contains_key("raycast-script-creator"));
+        assert_eq!(available.get("raycast-script-creator").unwrap(), &root);
+
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn discover_uses_local_directory_name_for_root_level_skill() {
+        let root = temp_dir("kasetto-root-skill-local");
+        fs::create_dir_all(&root).expect("create dirs");
+        fs::write(root.join("SKILL.md"), "# Root\n\nDesc\n").expect("write skill");
+
+        let available = discover(&root).expect("discover");
+        let root_name = root
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        assert!(available.contains_key(&root_name));
+        assert_eq!(available.get(&root_name).unwrap(), &root);
+
+        let _ = fs::remove_dir_all(&root);
     }
 
     #[test]
