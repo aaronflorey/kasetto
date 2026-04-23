@@ -33,6 +33,12 @@ pub fn run() -> Result<()> {
             } => {
                 crate::commands::list::run(json, output.plain, output.quiet, scope.scope_override())
             }
+            Commands::Search {
+                query,
+                json,
+                semantic,
+                api_key,
+            } => crate::commands::search::run(&query, json, semantic, api_key.as_deref()),
             Commands::Doctor {
                 json,
                 output,

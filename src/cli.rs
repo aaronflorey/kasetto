@@ -136,6 +136,29 @@ pub(crate) enum Commands {
         scope: ScopeArgs,
     },
     #[command(
+        about = "Search SkillsMP for published skills",
+        long_about = "Search the SkillsMP marketplace by keyword, or use semantic search with --semantic.\n\nUse --json for automation, and pass an API key with --api-key or $SKILLSMP_API_KEY when needed.",
+        after_help = crate::cli_examples!(
+            "kasetto search rust cli",
+            "kasetto search --semantic \"web scraper\" --api-key sk_live_...",
+            "kasetto search --json automation",
+        )
+    )]
+    Search {
+        #[arg(long)]
+        #[arg(help = "print search results as JSON")]
+        json: bool,
+        #[arg(long)]
+        #[arg(help = "use SkillsMP semantic search (/ai-search)")]
+        semantic: bool,
+        #[arg(long)]
+        #[arg(help = "SkillsMP API key (falls back to $SKILLSMP_API_KEY)")]
+        api_key: Option<String>,
+        #[arg(required = true, num_args = 1..)]
+        #[arg(help = "search query")]
+        query: Vec<String>,
+    },
+    #[command(
         about = "Run local diagnostics",
         long_about = "Inspect local kasetto setup, including version, manifest path, active installation paths, MCP servers, and failed skill installs from the latest sync report.",
         after_help = crate::cli_examples!("kasetto doctor", "kasetto doctor --json",)
@@ -220,4 +243,58 @@ pub(crate) enum SelfAction {
         #[arg(help = "skip confirmation prompt")]
         yes: bool,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn search_command_accepts_multi_word_query() {
+        let cli = Cli::try_parse_from(["kst", "search", "rust", "cli"]).expect("parse");
+        match cli.command {
+            Some(Commands::Search {
+                query,
+                json,
+                semantic,
+                api_key,
+            }) => {
+                assert_eq!(query, ["rust", "cli"]);
+                assert!(!json);
+                assert!(!semantic);
+                assert!(api_key.is_none());
+            }
+            _ => panic!("unexpected command"),
+        }
+    }
+
+    #[test]
+    fn search_command_accepts_flags() {
+        let cli = Cli::try_parse_from([
+            "kst",
+            "search",
+            "--json",
+            "--semantic",
+            "--api-key",
+            "secret",
+            "web",
+            "scraper",
+        ])
+        .expect("parse");
+
+        match cli.command {
+            Some(Commands::Search {
+                query,
+                json,
+                semantic,
+                api_key,
+            }) => {
+                assert_eq!(query, ["web", "scraper"]);
+                assert!(json);
+                assert!(semantic);
+                assert_eq!(api_key.as_deref(), Some("secret"));
+            }
+            _ => panic!("unexpected command"),
+        }
+    }
 }

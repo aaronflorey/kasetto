@@ -98,6 +98,7 @@ That's it. Kasetto pulls the skills and installs them into the right agent direc
 
 ```bash
 kst list      # interactive browser with vim-style navigation
+kst search rust cli
 kst doctor    # version, paths, last sync status
 ```
 
@@ -147,6 +148,22 @@ kst list [--json] [--quiet] [--plain] [--project | --global]
 ```
 
 In a terminal (and without `--plain`), this opens an interactive browser — Skills and MCPs tabs with detail panes. Navigate with `j`/`k`, switch tabs with Tab or `h`/`l`, scroll with `PgUp`/`PgDn`, jump with `gg`/`G`. Use `--plain`, set `NO_TUI=1`, or pipe stdout for a plain text listing.
+
+### `kst search`
+
+Searches the SkillsMP marketplace and prints ranked results with author, stars, update recency, and URLs. Use `--semantic` to call the SkillsMP AI search endpoint instead of keyword search.
+
+```bash
+kst search [--json] [--semantic] [--api-key <key>] <query...>
+```
+
+| Flag         | What it does                                              |
+| ------------ | --------------------------------------------------------- |
+| `--json`     | Print structured search results for scripts and agents    |
+| `--semantic` | Use SkillsMP semantic search (`/api/v1/skills/ai-search`) |
+| `--api-key`  | SkillsMP API key (falls back to `$SKILLSMP_API_KEY`)      |
+
+Keyword search works anonymously, but SkillsMP semantic search requires an API key. Kasetto surfaces SkillsMP rate-limit headers in both human output and JSON so scripts can react to remaining quota.
 
 ### `kst doctor`
 
