@@ -47,7 +47,9 @@ fn resolve_source_root(base_root: &Path, sub_dir: Option<&str>) -> Result<PathBu
         .components()
         .any(|c| matches!(c, Component::ParentDir | Component::RootDir))
     {
-        return Err(err("skills source `sub-dir` must not escape the source root"));
+        return Err(err(
+            "skills source `sub-dir` must not escape the source root",
+        ));
     }
 
     let resolved = base_root.join(rel);
@@ -141,13 +143,23 @@ fn discover_with_root_name(
     root_name: Option<&str>,
 ) -> Result<HashMap<String, PathBuf>> {
     let mut out = HashMap::new();
-    if root.join("SKILL.md").is_file() {
+    let root_skill_name = if root.join("SKILL.md").is_file() {
         if let Some(name) = root_name.filter(|name| !name.is_empty()) {
             out.insert(name.to_string(), root.to_path_buf());
+            Some(name.to_string())
+        } else {
+            None
         }
-    }
+    } else {
+        None
+    };
     discover_skills_in_subdir(root, &mut out)?;
     discover_skills_in_subdir(&root.join("skills"), &mut out)?;
+    if let Some(ref name) = root_skill_name {
+        if out.get(name).map(|p| p != root) == Some(true) {
+            eprintln!("warning: subdirectory skill `{name}` shadows root-level SKILL.md");
+        }
+    }
     Ok(out)
 }
 
@@ -157,7 +169,7 @@ fn discover_skills_in_subdir(base: &Path, out: &mut HashMap<String, PathBuf>) ->
     }
     for e in fs::read_dir(base)? {
         let e = e?;
-        if !e.file_type()?.is_dir() {
+        if !e.path().is_dir() {
             continue;
         }
         let d = e.path();
@@ -270,7 +282,10 @@ mod tests {
             materialize_source(&src, Path::new("/"), &stage).expect("materialize local subdir");
 
         assert!(materialized.available.contains_key("swift-apple-expert"));
-        assert_eq!(materialized.available.get("swift-apple-expert").unwrap(), &nested);
+        assert_eq!(
+            materialized.available.get("swift-apple-expert").unwrap(),
+            &nested
+        );
 
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&stage);
@@ -297,11 +312,7 @@ mod tests {
         fs::write(root.join("SKILL.md"), "# Root\n\nDesc\n").expect("write skill");
 
         let available = discover(&root).expect("discover");
-        let root_name = root
-            .file_name()
-            .unwrap()
-            .to_string_lossy()
-            .to_string();
+        let root_name = root.file_name().unwrap().to_string_lossy().to_string();
         assert!(available.contains_key(&root_name));
         assert_eq!(available.get(&root_name).unwrap(), &root);
 

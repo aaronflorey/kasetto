@@ -2,17 +2,25 @@ use std::fs;
 use std::io::{BufReader, BufWriter, Write};
 use std::path::Path;
 
-use crate::error::Result;
+use crate::error::{err, Result};
+
+const MAX_COPY_DEPTH: u32 = 32;
 
 pub(crate) fn copy_dir(src: &Path, dst: &Path) -> Result<()> {
     if dst.exists() {
         fs::remove_dir_all(dst)?;
     }
     fs::create_dir_all(dst)?;
-    copy_dir_contents(src, dst)
+    copy_dir_contents(src, dst, 0)
 }
 
-fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
+fn copy_dir_contents(src: &Path, dst: &Path, depth: u32) -> Result<()> {
+    if depth > MAX_COPY_DEPTH {
+        return Err(err(format!(
+            "copy depth limit ({MAX_COPY_DEPTH}) exceeded — possible symlink cycle at {}",
+            src.display()
+        )));
+    }
     for entry in fs::read_dir(src)? {
         let entry = entry?;
         let src_path = entry.path();
@@ -23,13 +31,13 @@ fn copy_dir_contents(src: &Path, dst: &Path) -> Result<()> {
             let meta = fs::metadata(&resolved)?;
             if meta.is_dir() {
                 fs::create_dir_all(&target)?;
-                copy_dir_contents(&resolved, &target)?;
+                copy_dir_contents(&resolved, &target, depth + 1)?;
             } else {
                 copy_file(&resolved, &target)?;
             }
         } else if file_type.is_dir() {
             fs::create_dir_all(&target)?;
-            copy_dir_contents(&src_path, &target)?;
+            copy_dir_contents(&src_path, &target, depth + 1)?;
         } else {
             copy_file(&src_path, &target)?;
         }
@@ -41,10 +49,9 @@ fn copy_file(src: &Path, dst: &Path) -> Result<()> {
     if let Some(parent) = dst.parent() {
         fs::create_dir_all(parent)?;
     }
-    let reader = BufReader::new(fs::File::open(src)?);
+    let mut reader = BufReader::new(fs::File::open(src)?);
     let mut writer = BufWriter::new(fs::File::create(dst)?);
-    let mut buf_reader = reader;
-    std::io::copy(&mut buf_reader, &mut writer)?;
+    std::io::copy(&mut reader, &mut writer)?;
     writer.flush()?;
     Ok(())
 }
