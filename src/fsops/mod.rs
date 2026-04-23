@@ -410,11 +410,44 @@ skills:
     }
 
     #[test]
+    fn config_parses_sub_dir_field() {
+        let yaml = r#"
+agent: cursor
+skills:
+  - source: https://github.com/example/pack
+    sub-dir: plugins/swift-apple-expert
+    skills: "*"
+"#;
+        let cfg: Config = serde_yaml::from_str(yaml).expect("parse");
+        assert_eq!(
+            cfg.skills[0].sub_dir.as_deref(),
+            Some("plugins/swift-apple-expert")
+        );
+    }
+
+    #[test]
+    fn config_parses_sub_dir_alias() {
+        let yaml = r#"
+agent: cursor
+skills:
+  - source: https://github.com/example/pack
+    sub_dir: plugins/swift-apple-expert
+    skills: "*"
+"#;
+        let cfg: Config = serde_yaml::from_str(yaml).expect("parse");
+        assert_eq!(
+            cfg.skills[0].sub_dir.as_deref(),
+            Some("plugins/swift-apple-expert")
+        );
+    }
+
+    #[test]
     fn git_pin_priority_ref_over_branch() {
         let spec = crate::model::SourceSpec {
             source: "https://github.com/x/y".into(),
             branch: Some("dev".into()),
             git_ref: Some("v1.0".into()),
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(
@@ -429,6 +462,7 @@ skills:
             source: "https://github.com/x/y".into(),
             branch: Some("dev".into()),
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(
@@ -443,6 +477,7 @@ skills:
             source: "https://github.com/x/y".into(),
             branch: None,
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(matches!(spec.git_pin(), GitPin::Default));

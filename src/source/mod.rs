@@ -10,7 +10,7 @@ pub(crate) use remote::rewrite_gitlab_raw_url;
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use crate::error::{err, Result};
 use crate::fsops::resolve_path;
@@ -27,6 +27,43 @@ fn repo_name_hint(parsed: &parse::RepoUrl) -> String {
         parse::RepoUrl::Bitbucket { repo_slug, .. } => repo_slug.clone(),
         parse::RepoUrl::Gitea { repo, .. } => repo.clone(),
     }
+}
+
+fn resolve_source_root(base_root: &Path, sub_dir: Option<&str>) -> Result<PathBuf> {
+    let Some(sub_dir) = sub_dir else {
+        return Ok(base_root.to_path_buf());
+    };
+
+    let trimmed = sub_dir.trim();
+    if trimmed.is_empty() {
+        return Err(err("skills source `sub-dir` cannot be empty"));
+    }
+
+    let rel = Path::new(trimmed);
+    if rel.is_absolute() {
+        return Err(err("skills source `sub-dir` must be relative"));
+    }
+    if rel
+        .components()
+        .any(|c| matches!(c, Component::ParentDir | Component::RootDir))
+    {
+        return Err(err("skills source `sub-dir` must not escape the source root"));
+    }
+
+    let resolved = base_root.join(rel);
+    if !resolved.exists() {
+        return Err(err(format!(
+            "skills source sub-dir not found: {}",
+            resolved.display()
+        )));
+    }
+    if !resolved.is_dir() {
+        return Err(err(format!(
+            "skills source sub-dir is not a directory: {}",
+            resolved.display()
+        )));
+    }
+    Ok(resolved)
 }
 
 pub(crate) fn materialize_source(
@@ -61,8 +98,16 @@ pub(crate) fn materialize_source(
             }
         };
 
-        let hint = repo_name_hint(&parsed);
-        let available = discover_with_root_name(stage, Some(hint.as_str()))?;
+        let source_root = resolve_source_root(stage, src.sub_dir.as_deref())?;
+        let hint = src
+            .sub_dir
+            .as_deref()
+            .and_then(|sub_dir| Path::new(sub_dir).file_name())
+            .and_then(|name| name.to_str())
+            .filter(|name| !name.is_empty())
+            .map(|name| name.to_string())
+            .unwrap_or_else(|| repo_name_hint(&parsed));
+        let available = discover_with_root_name(&source_root, Some(hint.as_str()))?;
         Ok(MaterializedSource {
             source_revision,
             available,
@@ -70,7 +115,8 @@ pub(crate) fn materialize_source(
         })
     } else {
         let root = resolve_path(cfg_dir, &src.source);
-        let available = discover(&root)?;
+        let source_root = resolve_source_root(&root, src.sub_dir.as_deref())?;
+        let available = discover(&source_root)?;
         Ok(MaterializedSource {
             source_revision: "local".into(),
             available,
@@ -189,6 +235,7 @@ mod tests {
             source: root.to_string_lossy().to_string(),
             branch: None,
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".to_string()),
         };
         let stage = temp_dir("kasetto-stage");
@@ -198,6 +245,32 @@ mod tests {
         assert!(materialized.cleanup_dir.is_none());
         assert!(materialized.available.contains_key("demo-skill"));
         assert!(root.exists());
+
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&stage);
+    }
+
+    #[test]
+    fn local_materialize_supports_sub_dir() {
+        let root = temp_dir("kasetto-local-subdir-src");
+        let nested = root.join("plugins/swift-apple-expert");
+        fs::create_dir_all(&nested).expect("create dirs");
+        fs::write(nested.join("SKILL.md"), "# Nested\n\nDesc\n").expect("write skill");
+
+        let src = SourceSpec {
+            source: root.to_string_lossy().to_string(),
+            branch: None,
+            git_ref: None,
+            sub_dir: Some("plugins/swift-apple-expert".to_string()),
+            skills: SkillsField::Wildcard("*".to_string()),
+        };
+
+        let stage = temp_dir("kasetto-stage-subdir");
+        let materialized =
+            materialize_source(&src, Path::new("/"), &stage).expect("materialize local subdir");
+
+        assert!(materialized.available.contains_key("swift-apple-expert"));
+        assert_eq!(materialized.available.get("swift-apple-expert").unwrap(), &nested);
 
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&stage);
