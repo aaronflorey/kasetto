@@ -2,11 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.2.0] - 2026-04-21
+## [2.3.0] - 2026-04-23
+
+### Bug fixes
+
+- **sync**: Harden skill discovery
+- **sync**: Follow symlinked directories in skill copy
+- **sync**: Discover root-level skill packs
+
+### Documentation
+
+- **sync**: Document root skill and sub-dir discovery
+- **roadmap**: Add library crate extraction
+- Soften dark theme text colors to match landing page palette
+- Use full banner logo in header and link to landing page
+- Replace landing page with quick start as docs index
+- **roadmap**: Add audit command and smart URL rewriting
 
 ### Features
 
+- **sync**: Support skills source sub-dir selection
 - **security**: Add self-update checksum verification and MCP approval gate
+
+### Release
+
+- V2.2.0
 
 ## [2.1.0] - 2026-04-19
 
