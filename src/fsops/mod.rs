@@ -415,6 +415,7 @@ skills:
             source: "https://github.com/x/y".into(),
             branch: Some("dev".into()),
             git_ref: Some("v1.0".into()),
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(
@@ -429,6 +430,7 @@ skills:
             source: "https://github.com/x/y".into(),
             branch: Some("dev".into()),
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(
@@ -443,6 +445,7 @@ skills:
             source: "https://github.com/x/y".into(),
             branch: None,
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".into()),
         };
         assert!(matches!(spec.git_pin(), GitPin::Default));

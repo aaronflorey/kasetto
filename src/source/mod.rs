@@ -163,6 +163,7 @@ mod tests {
             source: root.to_string_lossy().to_string(),
             branch: None,
             git_ref: None,
+            sub_dir: None,
             skills: SkillsField::Wildcard("*".to_string()),
         };
         let stage = temp_dir("kasetto-stage");

@@ -510,15 +510,19 @@ fn draw_add_loading_prompt(
     Ok(())
 }
 
+struct AddSkillPromptView<'a> {
+    program_name: &'a str,
+    repo: &'a str,
+    global: bool,
+    error: Option<&'a str>,
+}
+
 fn draw_add_skill_prompt(
     stdout: &mut Stdout,
-    program_name: &str,
-    repo: &str,
+    view: &AddSkillPromptView<'_>,
     available: &[String],
     selected: usize,
     chosen: &BTreeSet<String>,
-    global: bool,
-    error: Option<&str>,
 ) -> Result<()> {
     let (width, height) = terminal::size()?;
     let width = width as usize;
@@ -526,7 +530,7 @@ fn draw_add_skill_prompt(
 
     execute!(stdout, MoveTo(0, 0), Clear(ClearType::All))?;
 
-    let title = format!("{program_name} | カセット");
+    let title = format!("{} | カセット", view.program_name);
     let mut row = draw_banner_or_fallback(stdout, &title, width, height, 0)?;
 
     execute!(
@@ -540,7 +544,7 @@ fn draw_add_skill_prompt(
     )?;
     row = row.saturating_add(1);
 
-    execute!(stdout, MoveTo(0, row), Print(format!("Source: {repo}")))?;
+    execute!(stdout, MoveTo(0, row), Print(format!("Source: {}", view.repo)))?;
     row = row.saturating_add(1);
 
     execute!(
@@ -558,7 +562,7 @@ fn draw_add_skill_prompt(
         SetForegroundColor(term::SECONDARY),
         Print(format!(
             "Target config: {} (Ctrl-G toggles)",
-            config_target_label(global)
+            config_target_label(view.global)
         )),
         ResetColor
     )?;
@@ -601,7 +605,7 @@ fn draw_add_skill_prompt(
         row = row.saturating_add(1);
     }
 
-    if let Some(message) = error {
+    if let Some(message) = view.error {
         execute!(
             stdout,
             MoveTo(0, row),
@@ -638,13 +642,15 @@ fn prompt_add_skill_selection(
     loop {
         draw_add_skill_prompt(
             stdout,
-            program_name,
-            repo,
+            &AddSkillPromptView {
+                program_name,
+                repo,
+                global: *global,
+                error: error.as_deref(),
+            },
             available,
             selected,
             &chosen,
-            *global,
-            error.as_deref(),
         )?;
 
         match event::read()? {
@@ -879,13 +885,15 @@ fn prompt_remove_skill_selection(
     loop {
         draw_remove_skill_prompt(
             stdout,
-            program_name,
-            source,
+            &RemoveSkillPromptView {
+                program_name,
+                source,
+                global: *global,
+                error: error.as_deref(),
+            },
             skills,
             selected,
             &chosen,
-            *global,
-            error.as_deref(),
         )?;
 
         match event::read()? {
@@ -898,14 +906,12 @@ fn prompt_remove_skill_selection(
                     selected = (selected + 1).min(skills.len());
                     error = None;
                 }
-                KeyCode::Char(' ') => {
-                    if selected > 0 {
-                        let skill = skills[selected - 1].clone();
-                        if !chosen.insert(skill.clone()) {
-                            chosen.remove(&skill);
-                        }
-                        error = None;
+                KeyCode::Char(' ') if selected > 0 => {
+                    let skill = skills[selected - 1].clone();
+                    if !chosen.insert(skill.clone()) {
+                        chosen.remove(&skill);
                     }
+                    error = None;
                 }
                 KeyCode::Enter => {
                     if selected == 0 {
@@ -930,15 +936,19 @@ fn prompt_remove_skill_selection(
     }
 }
 
+struct RemoveSkillPromptView<'a> {
+    program_name: &'a str,
+    source: &'a str,
+    global: bool,
+    error: Option<&'a str>,
+}
+
 fn draw_remove_skill_prompt(
     stdout: &mut Stdout,
-    program_name: &str,
-    source: &str,
+    view: &RemoveSkillPromptView<'_>,
     skills: &[String],
     selected: usize,
     chosen: &BTreeSet<String>,
-    global: bool,
-    error: Option<&str>,
 ) -> Result<()> {
     let (width, height) = terminal::size()?;
     let width = width as usize;
@@ -946,7 +956,7 @@ fn draw_remove_skill_prompt(
 
     execute!(stdout, MoveTo(0, 0), Clear(ClearType::All))?;
 
-    let title = format!("{program_name} | カセット");
+    let title = format!("{} | カセット", view.program_name);
     let mut row = draw_banner_or_fallback(stdout, &title, width, height, 0)?;
 
     execute!(
@@ -960,7 +970,7 @@ fn draw_remove_skill_prompt(
     )?;
     row = row.saturating_add(1);
 
-    execute!(stdout, MoveTo(0, row), Print(format!("Source: {source}")))?;
+    execute!(stdout, MoveTo(0, row), Print(format!("Source: {}", view.source)))?;
     row = row.saturating_add(1);
 
     execute!(
@@ -969,7 +979,7 @@ fn draw_remove_skill_prompt(
         SetForegroundColor(term::SECONDARY),
         Print(format!(
             "Target config: {} (Ctrl-G toggles)",
-            config_target_label(global)
+            config_target_label(view.global)
         )),
         ResetColor
     )?;
@@ -1025,7 +1035,7 @@ fn draw_remove_skill_prompt(
         row = row.saturating_add(1);
     }
 
-    if let Some(message) = error {
+    if let Some(message) = view.error {
         execute!(
             stdout,
             MoveTo(0, row),
