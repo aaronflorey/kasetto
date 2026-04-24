@@ -26,6 +26,13 @@ pub fn run() -> Result<()> {
                     show_banner: true,
                 })
             }
+            Commands::Add { add } => crate::commands::add::run(&add.repo, &add.skills, add.global),
+            Commands::Remove { remove } => crate::commands::remove::run(
+                &remove.repo,
+                &remove.skills,
+                remove.global,
+                remove.unattended,
+            ),
             Commands::List {
                 json,
                 output,
