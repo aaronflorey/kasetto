@@ -86,7 +86,12 @@ pub(crate) struct SourceSpec {
     pub git_ref: Option<String>,
     /// Optional subdirectory inside the source repo/path to use as the skill root.
     /// Supports both `sub-dir` and `sub_dir` YAML keys.
-    #[serde(default, rename = "sub-dir", alias = "sub_dir")]
+    #[serde(
+        default,
+        rename = "sub-dir",
+        alias = "sub_dir",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub sub_dir: Option<String>,
     pub skills: SkillsField,
 }

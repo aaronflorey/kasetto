@@ -214,6 +214,7 @@ mod tests {
                 source: source.into(),
                 branch: None,
                 git_ref: None,
+                sub_dir: None,
                 skills,
             }],
             ..Config::default()

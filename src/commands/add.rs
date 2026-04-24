@@ -108,6 +108,7 @@ pub(crate) fn discover_available_skills(source: &str) -> Result<Vec<String>> {
         source: source.to_string(),
         branch: None,
         git_ref: None,
+        sub_dir: None,
         skills: SkillsField::Wildcard("*".to_string()),
     };
     let stage = std::env::temp_dir().join(format!(
@@ -189,6 +190,7 @@ fn upsert_skill_source(
         source: source.to_string(),
         branch: None,
         git_ref: None,
+        sub_dir: None,
         skills: if use_wildcard {
             SkillsField::Wildcard("*".to_string())
         } else {
@@ -267,16 +269,14 @@ mod tests {
 
     #[test]
     fn normalize_source_expands_github_shorthand() {
-        let dir = temp_dir("kasetto-add-github-shorthand");
-        fs::create_dir_all(&dir).expect("mkdir");
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let shorthand = format!("org/repo-{suffix}");
 
-        let original = std::env::current_dir().expect("cwd");
-        std::env::set_current_dir(&dir).expect("chdir");
-        let normalized = normalize_source("org/repo").expect("norm");
-        std::env::set_current_dir(original).expect("restore cwd");
-
-        assert_eq!(normalized, "https://github.com/org/repo");
-        let _ = fs::remove_dir_all(&dir);
+        let normalized = normalize_source(&shorthand).expect("norm");
+        assert_eq!(normalized, format!("https://github.com/{shorthand}"));
     }
 
     #[test]
@@ -286,12 +286,10 @@ mod tests {
         let nested = local.join("repo");
         fs::create_dir_all(&nested).expect("mkdirs");
 
-        let original = std::env::current_dir().expect("cwd");
-        std::env::set_current_dir(&dir).expect("chdir");
-        let normalized = normalize_source("org/repo").expect("norm");
-        std::env::set_current_dir(original).expect("restore cwd");
+        let source = nested.to_string_lossy().to_string();
+        let normalized = normalize_source(&source).expect("norm");
 
-        assert_eq!(normalized, "org/repo");
+        assert_eq!(normalized, source);
         let _ = fs::remove_dir_all(&dir);
     }
 
@@ -325,6 +323,7 @@ mod tests {
                 source: "https://github.com/org/repo".into(),
                 branch: None,
                 git_ref: None,
+                sub_dir: None,
                 skills: SkillsField::List(vec![SkillTarget::Name("alpha".into())]),
             }],
             ..Config::default()
@@ -348,6 +347,7 @@ mod tests {
                 source: "https://github.com/org/repo".into(),
                 branch: None,
                 git_ref: None,
+                sub_dir: None,
                 skills: SkillsField::List(vec![SkillTarget::Name("alpha".into())]),
             }],
             ..Config::default()
@@ -368,6 +368,7 @@ mod tests {
                 source: "https://github.com/org/repo".into(),
                 branch: None,
                 git_ref: None,
+                sub_dir: None,
                 skills: SkillsField::Wildcard("*".into()),
             }],
             ..Config::default()
@@ -405,6 +406,7 @@ mod tests {
                 source: "http://github.com/org/repo.git/".into(),
                 branch: None,
                 git_ref: None,
+                sub_dir: None,
                 skills: SkillsField::List(vec![SkillTarget::Name("alpha".into())]),
             }],
             ..Config::default()
