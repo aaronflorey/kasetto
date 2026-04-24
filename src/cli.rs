@@ -14,6 +14,8 @@ use crate::model::Scope;
     after_help = crate::cli_examples!(
         "kasetto",
         "kasetto sync --config https://example.com/kasetto.yaml --verbose",
+        "kasetto add https://github.com/org/skills --skill code-reviewer",
+        "kasetto remove https://github.com/org/skills --skill code-reviewer -u",
         "kasetto init",
         "kasetto list",
         "kasetto doctor",
@@ -89,6 +91,33 @@ pub(crate) struct SyncArgs {
     pub scope: ScopeArgs,
 }
 
+#[derive(Args, Clone, Debug, Default)]
+pub(crate) struct AddArgs {
+    #[arg(help = "repository URL or local path")]
+    pub repo: String,
+    #[arg(long = "skill")]
+    #[arg(help = "select one skill by name (repeatable)")]
+    pub skills: Vec<String>,
+    #[arg(long)]
+    #[arg(help = "write to $XDG_CONFIG_HOME/kasetto/kasetto.yaml")]
+    pub global: bool,
+}
+
+#[derive(Args, Clone, Debug, Default)]
+pub(crate) struct RemoveArgs {
+    #[arg(help = "repository URL or local path")]
+    pub repo: String,
+    #[arg(long = "skill")]
+    #[arg(help = "remove one skill by name (repeatable)")]
+    pub skills: Vec<String>,
+    #[arg(long)]
+    #[arg(help = "write to $XDG_CONFIG_HOME/kasetto/kasetto.yaml")]
+    pub global: bool,
+    #[arg(short = 'u')]
+    #[arg(help = "skip confirmation prompt")]
+    pub unattended: bool,
+}
+
 #[derive(Subcommand)]
 pub(crate) enum Commands {
     #[command(
@@ -120,6 +149,32 @@ pub(crate) enum Commands {
     Sync {
         #[command(flatten)]
         sync: SyncArgs,
+    },
+    #[command(
+        about = "Add a skill source to config",
+        long_about = "Discover skills from a repo or local source, then add or update that source in kasetto config. By default, writes ./kasetto.yaml and creates it if missing. With --global, writes $XDG_CONFIG_HOME/kasetto/kasetto.yaml.",
+        after_help = crate::cli_examples!(
+            "kasetto add https://github.com/org/skills",
+            "kasetto add https://github.com/org/skills --skill code-reviewer --skill docs",
+            "kasetto add https://github.com/org/skills --global",
+        )
+    )]
+    Add {
+        #[command(flatten)]
+        add: AddArgs,
+    },
+    #[command(
+        about = "Remove a skill source from config",
+        long_about = "Remove a source or selected skills from kasetto config. By default, writes ./kasetto.yaml. With --global, writes $XDG_CONFIG_HOME/kasetto/kasetto.yaml. Shows a preview before applying changes unless -u is set.",
+        after_help = crate::cli_examples!(
+            "kasetto remove https://github.com/org/skills",
+            "kasetto remove https://github.com/org/skills --skill code-reviewer --skill docs",
+            "kasetto remove https://github.com/org/skills -u --global",
+        )
+    )]
+    Remove {
+        #[command(flatten)]
+        remove: RemoveArgs,
     },
     #[command(
         about = "List installed skills and MCPs",

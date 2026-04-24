@@ -2,7 +2,7 @@
 
 mod prompt;
 
-use std::io::{stdout, IsTerminal, Stdout, Write};
+use std::io::{self, stdout, IsTerminal, Stdout, Write};
 use std::time::{Duration, Instant};
 
 use crossterm::cursor::MoveTo;
@@ -12,12 +12,12 @@ use crossterm::style::{Attribute, Print, ResetColor, SetAttribute, SetForeground
 use crossterm::terminal::{self, Clear, ClearType};
 
 use crate::banner::banner_width;
-use crate::cli::SyncArgs;
+use crate::cli::{AddArgs, RemoveArgs, SyncArgs};
 use crate::colors::term;
 use crate::error::Result;
 use crate::tui::{draw_banner_or_fallback, draw_stars, TuiGuard};
 
-use prompt::prompt_sync_args;
+use prompt::{prompt_add_args, prompt_remove_args, prompt_sync_args};
 
 pub(crate) fn run(program_name: &str, default_config: &str) -> Result<()> {
     if !stdout().is_terminal() || std::env::var_os("NO_TUI").is_some() {
@@ -25,7 +25,19 @@ pub(crate) fn run(program_name: &str, default_config: &str) -> Result<()> {
         return Ok(());
     }
 
-    match browse(program_name, default_config)? {
+    loop {
+        let action = browse(program_name, default_config)?;
+        if matches!(action, HomeAction::Quit) {
+            return Ok(());
+        }
+
+        run_action(action, program_name, default_config)?;
+        prompt_return_to_home()?;
+    }
+}
+
+fn run_action(action: HomeAction, program_name: &str, default_config: &str) -> Result<()> {
+    match action {
         HomeAction::Sync(sync) => {
             let config = sync.config.unwrap_or_else(|| default_config.into());
             crate::commands::sync::run(&crate::commands::sync::SyncOptions {
@@ -40,6 +52,13 @@ pub(crate) fn run(program_name: &str, default_config: &str) -> Result<()> {
                 show_banner: true,
             })
         }
+        HomeAction::Add(add) => crate::commands::add::run(&add.repo, &add.skills, add.global),
+        HomeAction::Remove(remove) => crate::commands::remove::run(
+            &remove.repo,
+            &remove.skills,
+            remove.global,
+            remove.unattended,
+        ),
         HomeAction::Init => crate::commands::init::run(false, false),
         HomeAction::List => crate::commands::list::run(false, false, false, None),
         HomeAction::Doctor => crate::commands::doctor::run(false, false, false, None, program_name),
@@ -49,8 +68,20 @@ pub(crate) fn run(program_name: &str, default_config: &str) -> Result<()> {
     }
 }
 
+fn prompt_return_to_home() -> Result<()> {
+    println!();
+    print!("Press Enter to return to the home screen...");
+    io::stdout().flush()?;
+
+    let mut input = String::new();
+    io::stdin().read_line(&mut input)?;
+    Ok(())
+}
+
 enum HomeAction {
     Sync(SyncArgs),
+    Add(AddArgs),
+    Remove(RemoveArgs),
     Init,
     List,
     Doctor,
@@ -62,6 +93,8 @@ enum HomeAction {
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum HomeItemAction {
     Sync,
+    Add,
+    Remove,
     Init,
     List,
     Doctor,
@@ -74,6 +107,8 @@ impl HomeItemAction {
     fn home_action(self) -> Option<HomeAction> {
         match self {
             HomeItemAction::Sync => None,
+            HomeItemAction::Add => None,
+            HomeItemAction::Remove => None,
             HomeItemAction::Init => Some(HomeAction::Init),
             HomeItemAction::List => Some(HomeAction::List),
             HomeItemAction::Doctor => Some(HomeAction::Doctor),
@@ -91,7 +126,7 @@ struct HomeItem {
     action: HomeItemAction,
 }
 
-const HOME_ITEMS: [HomeItem; 7] = [
+const HOME_ITEMS: [HomeItem; 9] = [
     HomeItem {
         title: "init",
         command: "kasetto init [--global] [--force]",
@@ -101,6 +136,16 @@ const HOME_ITEMS: [HomeItem; 7] = [
         title: "sync",
         command: "kasetto sync --config <path-or-url> [--dry-run] [--verbose]",
         action: HomeItemAction::Sync,
+    },
+    HomeItem {
+        title: "add",
+        command: "kasetto add <repo> [--skill <name>] [--global]",
+        action: HomeItemAction::Add,
+    },
+    HomeItem {
+        title: "remove",
+        command: "kasetto remove <repo> [--skill <name>] [--global] [-u]",
+        action: HomeItemAction::Remove,
     },
     HomeItem {
         title: "list",
@@ -163,6 +208,16 @@ fn browse(program_name: &str, default_config: &str) -> Result<HomeAction> {
                             return Ok(HomeAction::Sync(sync));
                         }
                     }
+                    KeyCode::Char('a') => {
+                        if let Some(add) = prompt_add_args(&mut guard.stdout, program_name)? {
+                            return Ok(HomeAction::Add(add));
+                        }
+                    }
+                    KeyCode::Char('r') => {
+                        if let Some(remove) = prompt_remove_args(&mut guard.stdout, program_name)? {
+                            return Ok(HomeAction::Remove(remove));
+                        }
+                    }
                     KeyCode::Char('l') => return Ok(HomeAction::List),
                     KeyCode::Char('d') => return Ok(HomeAction::Doctor),
                     KeyCode::Char('c') => return Ok(HomeAction::Clean),
@@ -171,6 +226,20 @@ fn browse(program_name: &str, default_config: &str) -> Result<HomeAction> {
                         let action = HOME_ITEMS[selected].action;
                         if let Some(ha) = action.home_action() {
                             return Ok(ha);
+                        }
+                        if action == HomeItemAction::Add {
+                            if let Some(add) = prompt_add_args(&mut guard.stdout, program_name)? {
+                                return Ok(HomeAction::Add(add));
+                            }
+                            continue;
+                        }
+                        if action == HomeItemAction::Remove {
+                            if let Some(remove) =
+                                prompt_remove_args(&mut guard.stdout, program_name)?
+                            {
+                                return Ok(HomeAction::Remove(remove));
+                            }
+                            continue;
                         }
                         if let Some(sync) =
                             prompt_sync_args(&mut guard.stdout, program_name, default_config)?
@@ -255,7 +324,7 @@ fn draw(
 
     let footer_row = height.saturating_sub(2) as u16;
     let hint = format!(
-        "q quit   ↑/↓ or j/k move   Enter run   i/s/l/d/c/u   sync args: {} [flags]",
+        "q quit   ↑/↓ or j/k move   Enter run   i/s/a/r/l/d/c/u   sync args: {} [flags]",
         command_text(program_name, &HOME_ITEMS[1])
     );
     execute!(
@@ -277,6 +346,8 @@ fn print_sleeping_hint(program_name: &str, default_config: &str) {
     println!("Try one of these next:");
     println!("  {} init", program_name);
     println!("  {} sync --config {}", program_name, default_config);
+    println!("  {} add https://github.com/org/skills", program_name);
+    println!("  {} remove https://github.com/org/skills", program_name);
     println!("  {} list", program_name);
     println!("  {} doctor", program_name);
     println!("  {} clean", program_name);

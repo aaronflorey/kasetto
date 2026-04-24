@@ -11,16 +11,21 @@ pub(crate) enum Scope {
     Project,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub(crate) struct Config {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub destination: Option<String>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub scope: Option<Scope>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub agent: Option<AgentField>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub skills: Vec<SourceSpec>,
     #[serde(default)]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub mcps: Vec<McpSourceSpec>,
 }
 
@@ -69,13 +74,15 @@ mod tests {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub(crate) struct SourceSpec {
     pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub branch: Option<String>,
     /// Pin to a git tag, commit SHA, or any ref. Takes priority over `branch`.
     /// When set, no main/master fallback is attempted.
     #[serde(rename = "ref")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub git_ref: Option<String>,
     /// Optional subdirectory inside the source repo/path to use as the skill root.
     /// Supports both `sub-dir` and `sub_dir` YAML keys.
@@ -107,14 +114,17 @@ impl SourceSpec {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub(crate) struct McpSourceSpec {
     pub source: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub branch: Option<String>,
     #[serde(rename = "ref")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub git_ref: Option<String>,
     /// Explicit path to an MCP JSON file within the repo (e.g. `.mcp.json`).
     /// When set, skips auto-discovery and uses this file directly.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<String>,
 }
 
@@ -130,14 +140,14 @@ impl McpSourceSpec {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(untagged)]
 pub(crate) enum SkillsField {
     Wildcard(String),
     List(Vec<SkillTarget>),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 #[serde(untagged)]
 pub(crate) enum SkillTarget {
     Name(String),

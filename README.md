@@ -138,6 +138,37 @@ kst sync [--config <path-or-url>] [--dry-run] [--quiet] [--json] [--plain] [--ve
 
 Missing skills are reported as broken but won't stop the rest of the run. The exit code is non-zero only for source-level failures.
 
+### `kst add`
+
+Discovers skills from a repo or local source and writes that source into config. By default it writes `./kasetto.yaml`, creating it when missing. With `--global`, it writes `$XDG_CONFIG_HOME/kasetto/kasetto.yaml`.
+
+```bash
+kst add <repo> [--skill <name>]... [--global]
+```
+
+| Flag        | What it does                                                         |
+| ----------- | -------------------------------------------------------------------- |
+| `--skill`   | Add only specific skills; repeat to include multiple names           |
+| `--global`  | Write the global config instead of `./kasetto.yaml`                  |
+
+If the source is already present, Kasetto updates it instead of duplicating it. Re-adding a source with no `--skill` promotes it to `skills: "*"`. Remote repo sources are normalized to a standard canonical URL before being written.
+
+### `kst remove`
+
+Removes a source from config, or removes specific skills from an explicitly listed source.
+
+```bash
+kst remove <repo> [--skill <name>]... [--global] [-u]
+```
+
+| Flag        | What it does                                                         |
+| ----------- | -------------------------------------------------------------------- |
+| `--skill`   | Remove only specific skills from an explicit list                    |
+| `--global`  | Write the global config instead of `./kasetto.yaml`                  |
+| `-u`        | Skip the confirmation prompt and apply the change immediately        |
+
+By default, `kst remove` shows a preview of the config path, normalized source, requested change, and resulting state before asking `Proceed? [y/N]`. Without `--skill`, the whole source entry is removed. Selective removal from a source stored as `skills: "*"` is rejected because the config does not track an explicit stored list to subtract from.
+
 ### `kst list`
 
 Shows skills and MCP servers from the lock file(s). **Without** `--project` or `--global`, both scopes are merged so you can tell global and project installs apart (scope is shown per row / in JSON).
@@ -210,6 +241,8 @@ When `--config` is omitted, Kasetto looks for config in this order:
 
 Point it at a specific file or URL with `--config`, or run `kst init` for local `./kasetto.yaml` (`kst init --global` writes the global config file).
 To persist a remote URL as your default, add a `source:` key to `~/.config/kasetto/config.yaml`.
+
+For building a local config incrementally, use `kst add https://github.com/org/skills` to append a discovered source without hand-editing YAML. Both `kst add` and `kst remove` are available from the TUI home screen.
 
 ```yaml
 # Choose an agent preset (single or multiple)...
