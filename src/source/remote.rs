@@ -166,15 +166,6 @@ pub(crate) fn rewrite_browse_to_raw_url(url: &str) -> Option<String> {
     rewrite_gitlab_raw_path(host, rest)
 }
 
-pub(crate) fn rewrite_gitlab_raw_url(url: &str) -> Option<String> {
-    let cleaned = url.split('?').next().unwrap_or(url);
-    let without_scheme = cleaned
-        .strip_prefix("https://")
-        .or_else(|| cleaned.strip_prefix("http://"))?;
-    let (host, rest) = without_scheme.split_once('/')?;
-    rewrite_gitlab_raw_path(host, rest)
-}
-
 fn rewrite_github_blob(rest: &str) -> Option<String> {
     let parts: Vec<&str> = rest.splitn(5, '/').collect();
     if parts.len() < 5 {

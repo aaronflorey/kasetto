@@ -18,9 +18,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::error::{err, Result};
 use crate::model::{Config, PresetDefinition, Scope, SkillTarget, SkillsField};
 use crate::source::{
-    auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, rewrite_browse_to_raw_url,
     auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, normalize_remote_yaml_url,
-    normalize_remote_yaml_url, rewrite_browse_to_raw_url,
 };
 use crate::DEFAULT_GLOBAL_CONFIG_FILENAME;
 
