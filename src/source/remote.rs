@@ -81,17 +81,85 @@ fn gitea_archive_tarball_url(host: &str, owner: &str, repo: &str, branch: &str) 
     format!("https://{host}/{owner}/{repo}/archive/{branch}.tar.gz")
 }
 
-pub(crate) fn rewrite_gitlab_raw_url(url: &str) -> Option<String> {
-    let cleaned = url.split('?').next().unwrap_or(url);
-    let without_scheme = cleaned
-        .strip_prefix("https://")
-        .or_else(|| cleaned.strip_prefix("http://"))?;
-
+/// Rewrite browser-style URLs (e.g. `/blob/`, `/src/branch/`) to the raw-content
+/// equivalent so users can paste a URL straight from their browser into
+/// `--config` or skill sources.
+pub(crate) fn rewrite_browse_to_raw_url(url: &str) -> Option<String> {
+    let (cleaned, query) = match url.split_once('?') {
+        Some((c, q)) => (c, Some(q)),
+        None => (url, None),
+    };
+    let scheme_len = if cleaned.starts_with("https://") {
+        "https://".len()
+    } else if cleaned.starts_with("http://") {
+        "http://".len()
+    } else {
+        return None;
+    };
+    let scheme = &cleaned[..scheme_len];
+    let without_scheme = &cleaned[scheme_len..];
     let (host, rest) = without_scheme.split_once('/')?;
+
     if host == "github.com" {
+        if let Some(rewritten) = rewrite_github_blob(rest) {
+            return Some(rewritten);
+        }
         return None;
     }
 
+    if super::hosts::is_gitea_style_host(host) {
+        if let Some(rewritten) = rewrite_gitea_src(scheme, host, rest, query) {
+            return Some(rewritten);
+        }
+        return None;
+    }
+
+    rewrite_gitlab_raw_url(host, rest)
+}
+
+fn rewrite_github_blob(rest: &str) -> Option<String> {
+    let parts: Vec<&str> = rest.splitn(5, '/').collect();
+    if parts.len() < 5 {
+        return None;
+    }
+    let (owner, repo, marker, git_ref, file_path) =
+        (parts[0], parts[1], parts[2], parts[3], parts[4]);
+    if !matches!(marker, "blob" | "raw") {
+        return None;
+    }
+    if owner.is_empty() || repo.is_empty() || git_ref.is_empty() || file_path.is_empty() {
+        return None;
+    }
+    Some(format!(
+        "https://raw.githubusercontent.com/{owner}/{repo}/{git_ref}/{file_path}"
+    ))
+}
+
+fn rewrite_gitea_src(scheme: &str, host: &str, rest: &str, query: Option<&str>) -> Option<String> {
+    let parts: Vec<&str> = rest.splitn(6, '/').collect();
+    if parts.len() < 6 {
+        return None;
+    }
+    let (owner, repo, src, kind, git_ref, file_path) =
+        (parts[0], parts[1], parts[2], parts[3], parts[4], parts[5]);
+    if src != "src" {
+        return None;
+    }
+    if !matches!(kind, "branch" | "commit" | "tag") {
+        return None;
+    }
+    if owner.is_empty() || repo.is_empty() || git_ref.is_empty() || file_path.is_empty() {
+        return None;
+    }
+    let mut out = format!("{scheme}{host}/{owner}/{repo}/raw/{kind}/{git_ref}/{file_path}");
+    if let Some(q) = query {
+        out.push('?');
+        out.push_str(q);
+    }
+    Some(out)
+}
+
+fn rewrite_gitlab_raw_url(host: &str, rest: &str) -> Option<String> {
     for marker in ["/-/raw/", "/-/blob/"] {
         if let Some(idx) = rest.find(marker) {
             let project = &rest[..idx];
@@ -217,7 +285,86 @@ mod tests {
     }
 
     #[test]
-    fn rewrite_github_returns_none() {
-        assert!(rewrite_gitlab_raw_url("https://github.com/owner/repo/file.yaml").is_none());
+    fn rewrite_github_blob_url_to_raw() {
+        let out = rewrite_browse_to_raw_url(
+            "https://github.com/pivoshenko/kasetto/blob/main/kasetto.yml",
+        )
+        .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://raw.githubusercontent.com/pivoshenko/kasetto/main/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn rewrite_github_blob_url_with_nested_path() {
+        let out = rewrite_browse_to_raw_url(
+            "https://github.com/owner/repo/blob/v1.2.3/configs/kasetto.yml",
+        )
+        .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://raw.githubusercontent.com/owner/repo/v1.2.3/configs/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn rewrite_github_raw_url_to_raw_alias() {
+        let out = rewrite_browse_to_raw_url("https://github.com/owner/repo/raw/main/kasetto.yml")
+            .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://raw.githubusercontent.com/owner/repo/main/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn rewrite_github_repo_root_returns_none() {
+        assert!(rewrite_browse_to_raw_url("https://github.com/owner/repo").is_none());
+    }
+
+    #[test]
+    fn rewrite_gitea_src_branch_to_raw() {
+        let out = rewrite_browse_to_raw_url(
+            "https://codeberg.org/owner/repo/src/branch/main/kasetto.yml",
+        )
+        .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://codeberg.org/owner/repo/raw/branch/main/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn rewrite_gitea_src_tag_to_raw() {
+        let out = rewrite_browse_to_raw_url(
+            "https://codeberg.org/owner/repo/src/tag/v1.0.0/configs/kasetto.yml",
+        )
+        .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://codeberg.org/owner/repo/raw/tag/v1.0.0/configs/kasetto.yml"
+        );
+    }
+
+    #[test]
+    fn rewrite_gitlab_blob_url_uses_api_raw_endpoint() {
+        let out =
+            rewrite_browse_to_raw_url("https://gitlab.com/group/sub/repo/-/blob/main/kasetto.yml")
+                .expect("rewritten");
+        assert_eq!(
+            out,
+            "https://gitlab.com/api/v4/projects/group%2Fsub%2Frepo/repository/files/kasetto.yml/raw?ref=main"
+        );
+    }
+
+    #[test]
+    fn rewrite_skips_unrecognized_url() {
+        assert!(rewrite_browse_to_raw_url("https://example.com/some/path").is_none());
+    }
+
+    #[test]
+    fn rewrite_skips_non_http_scheme() {
+        assert!(rewrite_browse_to_raw_url("git@github.com:owner/repo.git").is_none());
     }
 }

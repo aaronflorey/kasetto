@@ -18,14 +18,19 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::error::{err, Result};
 use crate::model::{Config, Scope, SkillTarget, SkillsField};
 use crate::source::{
-    auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, rewrite_gitlab_raw_url,
+    auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, rewrite_browse_to_raw_url,
 };
 
 pub(crate) fn load_config_any(config_path: &str) -> Result<(Config, PathBuf, String)> {
     if config_path.starts_with("http://") || config_path.starts_with("https://") {
-        let fetch_url =
-            rewrite_gitlab_raw_url(config_path).unwrap_or_else(|| config_path.to_string());
-        let auth = auth_for_request_url(config_path);
+        let fetch_url = match rewrite_browse_to_raw_url(config_path) {
+            Some(rewritten) if rewritten != config_path => {
+                eprintln!("note: rewrote browser URL to raw content: {rewritten}");
+                rewritten
+            }
+            _ => config_path.to_string(),
+        };
+        let auth = auth_for_request_url(&fetch_url);
         let request = auth.apply(http_client()?.get(&fetch_url));
         let response = request
             .send()

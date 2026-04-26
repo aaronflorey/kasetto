@@ -6,7 +6,7 @@ mod parse;
 mod remote;
 
 pub(crate) use auth::{auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint};
-pub(crate) use remote::rewrite_gitlab_raw_url;
+pub(crate) use remote::rewrite_browse_to_raw_url;
 
 use std::collections::HashMap;
 use std::fs;
