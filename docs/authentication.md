@@ -107,7 +107,7 @@ Authentication also applies when you fetch a config via `--config <url>`. The to
 
 ```bash
 export GITHUB_TOKEN=ghp_...
-kst sync --config https://github.com/org/private-repo/raw/main/kasetto.yaml
+kst sync --config https://github.com/org/private-repo/blob/main/kasetto.yaml
 ```
 
 If the URL points to a private resource and no matching token is set, Kasetto reports an HTTP error with a hint about which variable to set.

@@ -119,6 +119,14 @@ kst sync --config https://example.com/team-skills.yaml
 
 Great for sharing a single config across a team without checking it into every repository.
 
+Kasetto recognises browser URLs from GitHub, GitLab, and Gitea / Codeberg / Forgejo, and auto-rewrites them to the matching raw-content endpoint. You can paste any of these directly:
+
+- `https://github.com/owner/repo/blob/main/kasetto.yaml`
+- `https://gitlab.com/group/repo/-/blob/main/kasetto.yaml`
+- `https://codeberg.org/owner/repo/src/branch/main/kasetto.yaml`
+
+Kasetto prints a short `note: rewrote browser URL to raw content: ...` line so you can see what was fetched. Authentication is resolved against the rewritten host, so the same tokens that work for raw URLs apply here too.
+
 If the URL points to a private repo, Kasetto uses the same token-based authentication as skill sources. See [authentication](./authentication.md) for the full list of supported environment variables.
 
 ## Multiple Agents
