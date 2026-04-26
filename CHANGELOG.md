@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] - 2026-04-26
+
+### Documentation
+
+- **config**: Document browser URL auto-rewriting for --config
+
+### Features
+
+- **config**: Rewrite browser URLs to raw content for --config
+
 ## [2.3.0] - 2026-04-23
 
 ### Bug fixes
@@ -26,6 +36,7 @@ All notable changes to this project will be documented in this file.
 
 ### Release
 
+- V2.3.0
 - V2.2.0
 
 ## [2.1.0] - 2026-04-19
