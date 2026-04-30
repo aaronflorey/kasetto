@@ -130,6 +130,32 @@ fn mcp_servers_target(base: &Path, rel: &str) -> McpSettingsTarget {
 }
 
 impl Agent {
+    pub(crate) fn command_global_path(self, home: &Path) -> Option<PathBuf> {
+        match self {
+            Agent::Augment => Some(home.join(".augment/commands")),
+            Agent::ClaudeCode => Some(home.join(".claude/commands")),
+            Agent::GeminiCli => Some(home.join(".gemini/commands")),
+            Agent::Junie => Some(home.join(".junie/commands")),
+            Agent::OpenCode => Some(home.join(".config/opencode/commands")),
+            Agent::Roo => Some(home.join(".roo/commands")),
+            Agent::Windsurf => Some(home.join(".windsurf/workflows")),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn command_project_path(self, project_root: &Path) -> Option<PathBuf> {
+        match self {
+            Agent::Augment => Some(project_root.join(".augment/commands")),
+            Agent::ClaudeCode => Some(project_root.join(".claude/commands")),
+            Agent::GeminiCli => Some(project_root.join(".gemini/commands")),
+            Agent::Junie => Some(project_root.join(".junie/commands")),
+            Agent::OpenCode => Some(project_root.join(".opencode/commands")),
+            Agent::Roo => Some(project_root.join(".roo/commands")),
+            Agent::Windsurf => Some(project_root.join(".windsurf/workflows")),
+            _ => None,
+        }
+    }
+
     pub(crate) fn global_path(self, home: &Path) -> PathBuf {
         match self {
             Agent::Amp | Agent::Replit => home.join(".config/agents/skills"),

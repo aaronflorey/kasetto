@@ -16,7 +16,7 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::error::{err, Result};
-use crate::model::{Config, Scope, SkillTarget, SkillsField};
+use crate::model::{CommandTarget, CommandsField, Config, Scope, SkillTarget, SkillsField};
 use crate::source::{
     auth_env_inline_help, auth_for_request_url, http_fetch_auth_hint, rewrite_gitlab_raw_url,
 };
@@ -117,6 +117,63 @@ pub(crate) fn select_targets(
     Ok((out, broken))
 }
 
+pub(crate) type CommandSelection = (Vec<(String, PathBuf)>, Vec<BrokenSkill>);
+
+pub(crate) fn select_command_targets(
+    cf: &CommandsField,
+    available: &HashMap<String, PathBuf>,
+) -> Result<CommandSelection> {
+    let mut out = Vec::new();
+    let mut broken = Vec::new();
+    match cf {
+        CommandsField::Wildcard(s) if s == "*" => {
+            for (k, v) in available {
+                out.push((k.clone(), v.clone()));
+            }
+        }
+        CommandsField::List(items) => {
+            for it in items {
+                match it {
+                    CommandTarget::Name(name) => {
+                        if let Some(p) = available.get(name) {
+                            out.push((name.clone(), p.clone()));
+                        } else {
+                            broken.push(BrokenSkill {
+                                name: name.clone(),
+                                reason: format!("command not found: {name}"),
+                            });
+                        }
+                    }
+                    CommandTarget::Obj { name, path } => {
+                        if let Some(path) = path {
+                            let md = PathBuf::from(path).join(format!("{name}.md"));
+                            let toml = PathBuf::from(path).join(format!("{name}.toml"));
+                            if md.is_file() {
+                                out.push((name.clone(), md));
+                                continue;
+                            }
+                            if toml.is_file() {
+                                out.push((name.clone(), toml));
+                                continue;
+                            }
+                        }
+                        if let Some(p) = available.get(name) {
+                            out.push((name.clone(), p.clone()));
+                        } else {
+                            broken.push(BrokenSkill {
+                                name: name.clone(),
+                                reason: format!("command not found: {name}"),
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        _ => return Err(err("invalid commands field")),
+    }
+    Ok((out, broken))
+}
+
 #[derive(Debug)]
 pub(crate) struct BrokenSkill {
     pub name: String,
@@ -203,6 +260,41 @@ pub(crate) fn resolve_mcp_settings_targets(
     Ok(out)
 }
 
+pub(crate) fn resolve_command_destinations(
+    cfg: &Config,
+    scope: Scope,
+    project_root: &Path,
+) -> Result<Vec<PathBuf>> {
+    let agents = cfg.agents();
+    if agents.is_empty() {
+        return Ok(vec![]);
+    }
+    let mut seen = std::collections::HashSet::<PathBuf>::new();
+    let mut out = Vec::new();
+    match scope {
+        Scope::Project => {
+            for a in agents {
+                if let Some(path) = a.command_project_path(project_root) {
+                    if seen.insert(path.clone()) {
+                        out.push(path);
+                    }
+                }
+            }
+        }
+        Scope::Global => {
+            let home = dirs_home()?;
+            for a in agents {
+                if let Some(path) = a.command_global_path(&home) {
+                    if seen.insert(path.clone()) {
+                        out.push(path);
+                    }
+                }
+            }
+        }
+    }
+    Ok(out)
+}
+
 pub(crate) fn now_unix() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -226,7 +318,10 @@ pub(crate) fn temp_dir(prefix: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{Agent, AgentField, Config, GitPin, SkillTarget, SkillsField};
+    use crate::model::{
+        Agent, AgentField, CommandTarget, CommandsField, Config, GitPin, SkillTarget,
+        SkillsField,
+    };
     use std::path::Path;
 
     #[test]
@@ -271,6 +366,68 @@ mod tests {
         assert_eq!(targets[0].1, skill_dir);
 
         let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn select_command_targets_supports_md_and_toml_overrides() {
+        let root = temp_dir("kasetto-command-targets");
+        let md_dir = root.join("md");
+        let toml_dir = root.join("toml");
+        fs::create_dir_all(&md_dir).expect("create md dir");
+        fs::create_dir_all(&toml_dir).expect("create toml dir");
+        fs::write(md_dir.join("review.md"), "# review\n").expect("write md");
+        fs::write(toml_dir.join("triage.toml"), "name='triage'\n").expect("write toml");
+
+        let mut available = HashMap::new();
+        available.insert("review".to_string(), PathBuf::from("/tmp/review.md"));
+        available.insert("triage".to_string(), PathBuf::from("/tmp/triage.toml"));
+
+        let cf = CommandsField::List(vec![
+            CommandTarget::Obj {
+                name: "review".to_string(),
+                path: Some(md_dir.to_string_lossy().to_string()),
+            },
+            CommandTarget::Obj {
+                name: "triage".to_string(),
+                path: Some(toml_dir.to_string_lossy().to_string()),
+            },
+        ]);
+
+        let (targets, broken) = select_command_targets(&cf, &available).expect("select commands");
+        assert!(broken.is_empty());
+        assert_eq!(targets.len(), 2);
+        assert!(targets.iter().any(|(n, p)| n == "review" && p.ends_with("review.md")));
+        assert!(targets.iter().any(|(n, p)| n == "triage" && p.ends_with("triage.toml")));
+
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn resolve_command_destinations_for_supported_agents() {
+        let project_root = temp_dir("kasetto-command-destinations");
+        fs::create_dir_all(&project_root).expect("create project root");
+        let cfg: Config = serde_yaml::from_str(
+            "agent:\n  - claude-code\n  - opencode\n  - gemini-cli\nskills: []\n",
+        )
+        .expect("parse config");
+
+        let project_targets =
+            resolve_command_destinations(&cfg, Scope::Project, &project_root).expect("project");
+        assert!(project_targets.iter().any(|p| p.ends_with(".claude/commands")));
+        assert!(project_targets.iter().any(|p| p.ends_with(".opencode/commands")));
+        assert!(project_targets.iter().any(|p| p.ends_with(".gemini/commands")));
+
+        let global_targets =
+            resolve_command_destinations(&cfg, Scope::Global, &project_root).expect("global");
+        assert!(global_targets.iter().any(|p| p.ends_with(".claude/commands")));
+        assert!(
+            global_targets
+                .iter()
+                .any(|p| p.ends_with(".config/opencode/commands"))
+        );
+        assert!(global_targets.iter().any(|p| p.ends_with(".gemini/commands")));
+
+        let _ = fs::remove_dir_all(&project_root);
     }
 
     #[test]
