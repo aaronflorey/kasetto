@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - 2026-05-03
+
+### Bug fixes
+
+- **mcps**: Report broken entries individually; reject non-'*' wildcards
+- **tests**: Serialize env-var-touching tests with a mutex to prevent races
+- **tests**: Fix without-token test assertions and add env var cleanup
+- **github**: Url-encode git refs in API tarball endpoint
+- **tests**: Update github archive URL assertions to match API endpoint
+- **github**: Use API endpoint for private repo archive downloads
+- **github**: Url-encode git refs in API tarball endpoint
+- **github**: Use API endpoint for private repo archive downloads
+- **config**: Clean up rebase conflict resolution
+
+### CI/CD
+
+- Add manual docs deploy workflow; disable Vercel auto-deploy
+
+### Documentation
+
+- **contributing**: Add branch naming and expand commit message standards
+- Add Mermaid sync-flow diagram page; fix MkDocs setup
+- Update all prose docs for new mcps[] schema
+
+### Features
+
+- **landing**: Add dark/light theme toggle; refresh code block and grid bg
+- **cli**: Add config source management commands (#26)
+- **search**: Add SkillsMP marketplace search command
+- **config**: Support remote preset configs
+- **config**: Support reusable skill presets
+
+### Refactor
+
+- **mcps**: Align mcps[] schema with skills[] — drop path: field
+
+### Revert
+
+- Roll back to 1393a55 (before config presets and search features)
+
+### Style
+
+- Run formatters
+
 ## [2.4.0] - 2026-04-26
 
 ### Documentation
@@ -11,6 +55,10 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - **config**: Rewrite browser URLs to raw content for --config
+
+### Release
+
+- V2.4.0
 
 ## [2.3.0] - 2026-04-23
 
