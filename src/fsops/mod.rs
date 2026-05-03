@@ -231,7 +231,9 @@ pub(crate) fn temp_dir(prefix: &str) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::{Agent, AgentField, Config, GitPin, McpEntry, McpsField, SkillTarget, SkillsField};
+    use crate::model::{
+        Agent, AgentField, Config, GitPin, McpEntry, McpsField, SkillTarget, SkillsField,
+    };
     use std::path::Path;
 
     #[test]

@@ -215,10 +215,7 @@ pub(crate) fn discover_mcps(root: &Path) -> Result<Vec<PathBuf>> {
 /// - `Obj { name: "github", path: None }` → `<root>/mcps/github.json`
 ///
 /// `.json` is appended automatically when the name has no extension.
-pub(crate) fn resolve_mcp_entry(
-    root: &Path,
-    entry: &crate::model::McpEntry,
-) -> Result<PathBuf> {
+pub(crate) fn resolve_mcp_entry(root: &Path, entry: &crate::model::McpEntry) -> Result<PathBuf> {
     let (name, dir) = match entry {
         crate::model::McpEntry::Name(n) => (n.as_str(), "mcps"),
         crate::model::McpEntry::Obj { name, path } => {
