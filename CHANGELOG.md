@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.1] - 2026-05-04
+
+### Bug fixes
+
+- **landing**: Add type=button; fix biome suppression for theme script
+- **landing**: Prevent theme icon flash on light-mode; trim trailing blank line
+- **mcps**: Stale mcp/ hint, extension check, init template, mcp/-rename warning
+
+### CI/CD
+
+- Run landing deploy from repo root; rootDirectory handled by Vercel project settings
+- Add manual landing deploy workflow
+- Simplify docs deploy — let Vercel build from docs/ via vercel.json
+- Use venv instead of --system to avoid permission denied on runner
+- Add --break-system-packages for uv on ubuntu-latest
+- Update job names
+- Update job names
+- Move VERCEL_TOKEN to env block to prevent argv leak (bug_007)
+
+### Documentation
+
+- Add missing mcps: field to Quick Start MCP example (bug_017)
+
 ## [2.5.0] - 2026-05-03
 
 ### Bug fixes
@@ -37,6 +60,10 @@ All notable changes to this project will be documented in this file.
 ### Refactor
 
 - **mcps**: Align mcps[] schema with skills[] — drop path: field
+
+### Release
+
+- V2.5.0
 
 ### Revert
 
