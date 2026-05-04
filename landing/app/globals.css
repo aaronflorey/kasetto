@@ -231,7 +231,7 @@ button {
 
 .version-badge {
   margin-left: 10px;
-  color: var(--fg-subtle);
+  color: var(--kst-purple);
 }
 
 .star-count {
