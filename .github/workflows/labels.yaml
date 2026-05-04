@@ -5,14 +5,14 @@ name: GH Labels
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
     paths:
       - ".github/labels.yaml"
       - ".github/workflows/labels.yaml"
   workflow_dispatch:
 
 jobs:
-  labels:
+  set-labels:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
