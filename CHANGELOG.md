@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0] - 2026-05-04
+
+### Bug fixes
+
+- **landing**: Shorten etymology line
+- **landing**: Mention mcp sources in etymology line
+- **landing**: Version badge inherits text color
+- **landing**: Version badge same amber as star count
+- **landing**: Use accent purple for version badge
+- **landing**: Vertically align version and star count in action label
+- **landing**: Show version after stars, match label font size
+- **landing**: Softer warm off-white light mode palette
+
+### Documentation
+
+- Remove --yes and MCP confirmation gate references
+- **readme**: Reformat tables; update etymology wording
+- Mention MCP sources in name etymology
+
+### Features
+
+- **sync**: Remove MCP confirmation prompt
+- **sync**: Add --force flag and surface skipped MCPs
+- **landing**: Add name etymology under tagline
+- **landing**: Show latest release version next to GitHub row
+
+### Miscellaneous
+
+- **justfile**: Add update-next, update-docs, split update into sub-recipes
+
+### Refactor
+
+- **sync**: Remove --force flag
+
+### Build
+
+- Update dev dependencies
+
+### Style
+
+- **landing**: Apply formatter line wrap
+
 ## [2.5.1] - 2026-05-04
 
 ### Bug fixes
@@ -24,6 +66,10 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Add missing mcps: field to Quick Start MCP example (bug_017)
+
+### Release
+
+- V2.5.1
 
 ## [2.5.0] - 2026-05-03
 
