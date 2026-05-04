@@ -112,6 +112,7 @@ skills:
 
 mcps:
   - source: https://github.com/org/mcp-pack
+    mcps: "*"
 ```
 
 Kasetto merges them into each agent's native settings file during sync — nothing extra to do.
