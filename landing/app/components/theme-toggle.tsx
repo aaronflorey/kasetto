@@ -29,10 +29,10 @@ export function ThemeToggle() {
     localStorage.setItem("theme", next);
   }
 
-  if (!mounted) return <button className="footer-icon" aria-label="Toggle theme" />;
+  if (!mounted) return <button type="button" className="footer-icon" aria-label="Toggle theme" />;
 
   return (
-    <button onClick={toggle} className="footer-icon" aria-label="Toggle theme">
+    <button type="button" onClick={toggle} className="footer-icon" aria-label="Toggle theme">
       {theme === "dark" ? <BsSun /> : <BsMoon />}
     </button>
   );

@@ -31,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={jetbrainsMono.className} suppressHydrationWarning>
       <head>
         <script
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional blocking theme script to prevent flash
           dangerouslySetInnerHTML={{
             __html: `(function(){var s=localStorage.getItem('theme');var t=s==='light'||s==='dark'?s:window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);})();`,
           }}
