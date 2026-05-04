@@ -36,24 +36,24 @@
 /* ─── Light palette (shared by media query + explicit override) ─── */
 @media (prefers-color-scheme: light) {
   :root {
-    --base: #eff1f5;
-    --mantle: #e6e9ef;
-    --surface0: #ccd0da;
-    --surface1: #bcc0cc;
-    --surface2: #acb0be;
-    --overlay1: #8c8fa1;
-    --subtext0: #6c6f85;
-    --subtext1: #5c5f77;
-    --text: #4c4f69;
+    --base: #e8e4df;
+    --mantle: #dedad4;
+    --surface0: #cbc6bf;
+    --surface1: #b8b3ac;
+    --surface2: #a09b94;
+    --overlay1: #7a7470;
+    --subtext0: #5e5955;
+    --subtext1: #47433f;
+    --text: #302d2a;
 
-    --mauve: #8839ef;
-    --lavender: #7287fd;
-    --sky: #04a5e5;
-    --green: #40a02b;
-    --yellow: #df8e1d;
+    --mauve: #7c3aed;
+    --lavender: #5b6fd6;
+    --sky: #0284c7;
+    --green: #16a34a;
+    --yellow: #b45309;
 
-    --kst-purple: #8839ef;
-    --grid-color: rgba(0, 0, 0, 0.055);
+    --kst-purple: #7c3aed;
+    --grid-color: rgba(0, 0, 0, 0.07);
   }
 }
 
