@@ -13,17 +13,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Install dependencies
-        run: uv venv .venv && uv pip install --python .venv/bin/python -r docs/requirements.txt
-
-      - name: Build docs
-        run: cd docs && ../.venv/bin/mkdocs build -f mkdocs.yml
-
       - name: Deploy to Vercel
-        run: npx vercel deploy site/ --prod
+        run: npx vercel deploy --prod --yes
+        working-directory: docs
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
