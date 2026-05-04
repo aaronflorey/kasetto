@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  set-labels:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
