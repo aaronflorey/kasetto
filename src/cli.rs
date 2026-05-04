@@ -83,9 +83,6 @@ pub(crate) struct SyncArgs {
     #[arg(help = "print per-skill action list")]
     pub verbose: bool,
     #[arg(long)]
-    #[arg(help = "skip confirmation prompt for new MCP servers")]
-    pub yes: bool,
-    #[arg(long)]
     #[arg(help = "re-sync all skills and MCPs even if content is unchanged")]
     pub force: bool,
     #[command(flatten)]

@@ -41,7 +41,6 @@ pub(crate) struct Summary {
     pub updated: usize,
     pub removed: usize,
     pub unchanged: usize,
-    pub skipped: usize,
     pub broken: usize,
     pub failed: usize,
 }

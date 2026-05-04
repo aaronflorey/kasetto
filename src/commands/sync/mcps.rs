@@ -1,9 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
-use std::io::{self, IsTerminal, Write};
 use std::path::PathBuf;
 
-use crate::colors::{ACCENT, RESET, SECONDARY, WARNING};
 use crate::error::{err, Result};
 use crate::fsops::{hash_file, now_unix, resolve_mcp_settings_targets};
 use crate::lock::LockFile;
@@ -189,74 +187,7 @@ pub(super) fn sync_mcps(
         }
     }
 
-    // Phase 2: prompt for confirmation when new MCP servers will be registered
-    let new_servers: Vec<&PendingMcp> = pending.iter().filter(|p| p.is_new).collect();
-    if !new_servers.is_empty() && !ctx.dry_run && !ctx.yes {
-        let all_names: Vec<&str> = new_servers
-            .iter()
-            .flat_map(|p| p.server_names.iter().map(|s| s.as_str()))
-            .collect();
-
-        if !all_names.is_empty() {
-            let approved = confirm_new_mcps(&all_names, ctx.plain)?;
-            if !approved {
-                // User declined — mark new installs as skipped, still apply updates
-                for p in &pending {
-                    if p.is_new {
-                        if !ctx.as_json && !ctx.quiet {
-                            let label = sync_label("MCP", &p.file_name, &p.source, ctx.plain);
-                            with_spinner(ctx.animate, ctx.plain, &label, || {
-                                Ok::<(), crate::error::Error>(())
-                            })?;
-                            if ctx.plain {
-                                eprintln!("~ Skipped MCP {} (declined)", p.file_name);
-                            } else {
-                                use crate::colors::{SECONDARY, WARNING};
-                                eprintln!(
-                                    "{WARNING}~{RESET} Skipped {ACCENT}{}{RESET} {SECONDARY}(declined — re-run with --yes to install){RESET}",
-                                    p.file_name,
-                                    WARNING = WARNING,
-                                    RESET = crate::colors::RESET,
-                                    ACCENT = ACCENT,
-                                    SECONDARY = SECONDARY,
-                                );
-                            }
-                        }
-                        summary.skipped += 1;
-                        actions.push(Action {
-                            source: Some(p.source.clone()),
-                            skill: Some(format!("mcp:{}", p.file_name)),
-                            status: "skipped".into(),
-                            error: None,
-                        });
-                    }
-                }
-                // Only keep updates
-                let pending_updates: Vec<PendingMcp> =
-                    pending.into_iter().filter(|p| !p.is_new).collect();
-                apply_pending(
-                    ctx,
-                    lock,
-                    summary,
-                    actions,
-                    &mcp_settings_list,
-                    &pending_updates,
-                )?;
-                cleanup_staged(&cleanup_dirs);
-                remove_stale(
-                    ctx,
-                    lock,
-                    summary,
-                    actions,
-                    &desired_mcp_ids,
-                    &mcp_settings_list,
-                );
-                return Ok(());
-            }
-        }
-    }
-
-    // Phase 3: apply all pending installs and updates
+    // Phase 2: apply all pending installs and updates
     apply_pending(ctx, lock, summary, actions, &mcp_settings_list, &pending)?;
     cleanup_staged(&cleanup_dirs);
 
@@ -379,41 +310,6 @@ fn remove_stale(
 }
 
 /// Prompt the user to confirm registration of new MCP servers.
-/// Returns `true` if approved, `false` if declined.
-/// Errors in non-interactive mode (piped stdin) to prevent unreviewed registration.
-fn confirm_new_mcps(server_names: &[&str], plain: bool) -> Result<bool> {
-    if !io::stdin().is_terminal() {
-        return Err(err(
-            "new MCP servers would be registered but stdin is not a terminal; pass --yes to confirm",
-        ));
-    }
-
-    println!();
-    if plain {
-        println!("The following MCP servers will be registered:");
-    } else {
-        println!("{WARNING}The following MCP servers will be registered:{RESET}");
-    }
-    for name in server_names {
-        if plain {
-            println!("  - {name}");
-        } else {
-            println!("  {SECONDARY}-{RESET} {ACCENT}{name}{RESET}");
-        }
-    }
-    println!();
-
-    if plain {
-        print!("Proceed? [y/N] ");
-    } else {
-        print!("{ACCENT}Proceed?{RESET} [y/N] ");
-    }
-    io::stdout().flush()?;
-
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-    Ok(matches!(input.trim(), "y" | "Y" | "yes"))
-}
 
 #[cfg(test)]
 mod tests {
