@@ -33,7 +33,6 @@ kst sync [OPTIONS]
 | `--json`                 | Print the sync report as JSON                                |
 | `--plain`                | Disable colors and spinner animations                        |
 | `--verbose`              | Show per-skill action details                                |
-| `--yes`                  | Skip confirmation prompt for new MCP servers                 |
 | `--project`              | Install into the current project directory                   |
 | `--global`               | Install globally (default)                                   |
 

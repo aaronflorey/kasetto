@@ -183,21 +183,6 @@ flowchart TD
     I --> J
 ```
 
-### Confirmation Gate
-
-```mermaid
-flowchart TD
-    A{Any new servers\nin pending?} -->|no| E[apply all pending]
-    A -->|yes| B{--yes flag?}
-    B -->|yes| E
-    B -->|no| C{stdin is terminal?}
-    C -->|no| D[error: pass --yes]
-    C -->|yes| F[print new server names\nprompt y/N]
-    F --> G{User confirms?}
-    G -->|yes| E
-    G -->|no| H[skip new installs\napply updates only]
-```
-
 ### Merge Into Agent Settings
 
 ```mermaid
