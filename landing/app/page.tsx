@@ -64,8 +64,7 @@ export default async function Page() {
           <div className="hero-row">
             <p className="hero-tagline">DECLARATIVE AI AGENT ENVIRONMENT MANAGER</p>
             <p className="hero-etymology">
-              from <span className="hero-etymology-jp">カセット</span> — cassette. think of skill
-              and mcp sources as cassettes you plug in, swap out, and share across machines.
+              <span className="hero-etymology-jp">カセット</span> — cassette. plug in, swap out, share.
             </p>
           </div>
 
