@@ -78,13 +78,13 @@ export default async function Page() {
           <div className="action-row">
             <span className="action-label">
               GITHUB
-              {version && <span className="version-badge">{version}</span>}
               {stars && (
                 <span className="accent-warm star-count">
                   <GoStar aria-hidden="true" />
                   {stars}
                 </span>
               )}
+              {version && <span className="version-badge">{version}</span>}
             </span>
             <a
               href="https://github.com/pivoshenko/kasetto"
