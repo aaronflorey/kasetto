@@ -95,10 +95,17 @@ mcps:
 
 Each entry in the `skills` list can be a string (the skill name) or an object:
 
-| Key    | Required | Description                                                 |
-| ------ | -------- | ----------------------------------------------------------- |
-| `name` | **yes**  | Name of the skill directory to install                      |
-| `path` | no       | Custom subdirectory within the source to look for the skill |
+| Key    | Required | Description                                                                                   |
+| ------ | -------- | --------------------------------------------------------------------------------------------- |
+| `name` | **yes**  | Name of the skill directory to install                                                        |
+| `path` | no       | Parent directory containing `<name>/SKILL.md`, resolved relative to the source root (or `sub-dir` if set). Absolute paths are honored as-is. |
+
+| Form                                | Resolves to                                |
+| ----------------------------------- | ------------------------------------------ |
+| `- code-reviewer`                   | discovered (root or `skills/`)             |
+| `- { name: x }`                     | discovered (root or `skills/`)             |
+| `- { name: x, path: dir }`          | `dir/x/SKILL.md`                           |
+| `- { name: x, path: nested/dir }`   | `nested/dir/x/SKILL.md`                    |
 
 ### MCP Source Fields
 
@@ -119,14 +126,15 @@ When `mcps: "*"`, Kasetto auto-discovers MCP config files in this order:
 
 Each entry in the `mcps` list can be a plain string (name) or an object — mirrors skill entries:
 
-| Form                       | Resolves to        |
-| -------------------------- | ------------------ |
-| `- github`                 | `mcps/github.json` |
-| `- github.json`            | `mcps/github.json` |
-| `- { name: x, path: dir }` | `dir/x.json`       |
-| `- { name: x }`            | `mcps/x.json`      |
+| Form                              | Resolves to             |
+| --------------------------------- | ----------------------- |
+| `- github`                        | `mcps/github.json`      |
+| `- github.json`                   | `mcps/github.json`      |
+| `- { name: x }`                   | `mcps/x.json`           |
+| `- { name: x, path: dir }`        | `dir/x.json`            |
+| `- { name: x, path: nested/dir }` | `nested/dir/x.json`     |
 
-`.json` is appended automatically when the name has no extension.
+Paths are resolved relative to the source root (or `sub-dir` if set); absolute paths are honored as-is. `.json` is appended automatically when the name has no extension.
 
 
 MCP config files must contain a `mcpServers` object with server definitions. Servers are merged

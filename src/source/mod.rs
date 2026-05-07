@@ -113,6 +113,7 @@ pub(crate) fn materialize_source(
         Ok(MaterializedSource {
             source_revision,
             available,
+            source_root,
             cleanup_dir: Some(stage.to_path_buf()),
         })
     } else {
@@ -122,6 +123,7 @@ pub(crate) fn materialize_source(
         Ok(MaterializedSource {
             source_revision: "local".into(),
             available,
+            source_root,
             cleanup_dir: None,
         })
     }
@@ -130,6 +132,7 @@ pub(crate) fn materialize_source(
 pub(crate) struct MaterializedSource {
     pub source_revision: String,
     pub available: HashMap<String, PathBuf>,
+    pub source_root: PathBuf,
     pub cleanup_dir: Option<PathBuf>,
 }
 

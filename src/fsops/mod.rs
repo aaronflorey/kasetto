@@ -75,6 +75,7 @@ pub(crate) type TargetSelection = (Vec<(String, PathBuf)>, Vec<BrokenSkill>);
 pub(crate) fn select_targets(
     sf: &SkillsField,
     available: &HashMap<String, PathBuf>,
+    source_root: &Path,
 ) -> Result<TargetSelection> {
     let mut out = Vec::new();
     let mut broken = Vec::new();
@@ -99,11 +100,25 @@ pub(crate) fn select_targets(
                     }
                     SkillTarget::Obj { name, path } => {
                         if let Some(path) = path {
-                            let d = PathBuf::from(path).join(name);
+                            let base = PathBuf::from(path);
+                            let base = if base.is_absolute() {
+                                base
+                            } else {
+                                source_root.join(base)
+                            };
+                            let d = base.join(name);
                             if d.join("SKILL.md").exists() {
                                 out.push((name.clone(), d));
                                 continue;
                             }
+                            broken.push(BrokenSkill {
+                                name: name.clone(),
+                                reason: format!(
+                                    "skill not found at `{}`",
+                                    base.join(name).display()
+                                ),
+                            });
+                            continue;
                         }
                         if let Some(p) = available.get(name) {
                             out.push((name.clone(), p.clone()));
@@ -245,7 +260,8 @@ mod tests {
             SkillTarget::Name("missing".to_string()),
         ]);
 
-        let (targets, broken) = select_targets(&sf, &available).expect("select");
+        let (targets, broken) =
+            select_targets(&sf, &available, Path::new("/tmp")).expect("select");
         assert_eq!(targets.len(), 1);
         assert_eq!(targets[0].0, "present");
         assert_eq!(broken.len(), 1);
@@ -271,10 +287,33 @@ mod tests {
             path: Some(nested.to_string_lossy().to_string()),
         }]);
 
-        let (targets, broken) = select_targets(&sf, &available).expect("select");
+        let (targets, broken) =
+            select_targets(&sf, &available, Path::new("/tmp")).expect("select");
         assert!(broken.is_empty());
         assert_eq!(targets.len(), 1);
         assert_eq!(targets[0].0, "custom-skill");
+        assert_eq!(targets[0].1, skill_dir);
+
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn select_targets_resolves_relative_path_against_source_root() {
+        let root = temp_dir("kasetto-targets-rel");
+        let skill_dir = root.join("skills/productivity/grill-me");
+        fs::create_dir_all(&skill_dir).expect("create dirs");
+        fs::write(skill_dir.join("SKILL.md"), "# Grill\n\nDesc\n").expect("write skill");
+
+        let available = HashMap::new();
+        let sf = SkillsField::List(vec![SkillTarget::Obj {
+            name: "grill-me".to_string(),
+            path: Some("skills/productivity".to_string()),
+        }]);
+
+        let (targets, broken) = select_targets(&sf, &available, &root).expect("select");
+        assert!(broken.is_empty());
+        assert_eq!(targets.len(), 1);
+        assert_eq!(targets[0].0, "grill-me");
         assert_eq!(targets[0].1, skill_dir);
 
         let _ = fs::remove_dir_all(&root);

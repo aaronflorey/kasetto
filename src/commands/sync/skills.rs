@@ -25,7 +25,7 @@ pub(super) fn sync_skills(
         match materialize_source(src, ctx.cfg_dir, &stage) {
             Ok(materialized) => {
                 let (targets, broken_skills) =
-                    select_targets(&src.skills, &materialized.available)?;
+                    select_targets(&src.skills, &materialized.available, &materialized.source_root)?;
 
                 record_broken_skills(ctx, &src.source, broken_skills, summary, actions);
 
