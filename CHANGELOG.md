@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.7.0] - 2026-05-09
+
+### Documentation
+
+- Expand example config with real-world skill packs
+- Remove roadmap section
+
+### Features
+
+- **config**: Add extends for config inheritance
+
 ## [2.6.1] - 2026-05-07
 
 ### Bug fixes
@@ -13,6 +24,10 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Add real-world config example link
+
+### Release
+
+- V2.6.1
 
 ## [2.6.0] - 2026-05-04
 
