@@ -9,11 +9,14 @@ export function TopNav() {
         </a>
         <div className="top-nav-links">
           <a href="/docs" className="top-nav-link">
-            DOCS
+            DOCS{" "}
+            <span className="top-nav-arrow" aria-hidden>
+              ↗
+            </span>
           </a>
           <a
             href="https://github.com/pivoshenko/kasetto"
-            className="top-nav-link"
+            className="top-nav-link top-nav-icon"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"

@@ -111,11 +111,7 @@ export function HeroTerminal() {
             const visible = isDone || isResolving;
             return (
               <div key={src.name} className="t-row t-fade" data-shown={visible}>
-                {isDone ? (
-                  <span className="t-ok">✓</span>
-                ) : (
-                  <span className="t-spin" aria-hidden />
-                )}
+                {isDone ? <span className="t-ok">✓</span> : <span className="t-spin" aria-hidden />}
                 <span>{src.name}</span>
                 <span className="t-dim">{isDone ? src.count : "resolving…"}</span>
               </div>
@@ -124,15 +120,11 @@ export function HeroTerminal() {
 
           <div className="t-summary-line t-fade" data-shown={phase === "done"}>
             <span className="t-dim">synced</span>
-            <span className="t-summary-pair">
-              <span className="t-summary">{SUMMARY.skills}</span>
-              <span className="t-dim"> skills</span>
-            </span>
+            <span className="t-summary">{SUMMARY.skills}</span>
+            <span className="t-dim">skills</span>
             <span className="t-dim">·</span>
-            <span className="t-summary-pair">
-              <span className="t-summary">{SUMMARY.mcps}</span>
-              <span className="t-dim"> mcps</span>
-            </span>
+            <span className="t-summary">{SUMMARY.mcps}</span>
+            <span className="t-dim">mcps</span>
           </div>
         </div>
       </div>

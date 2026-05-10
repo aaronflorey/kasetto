@@ -185,29 +185,123 @@ export default async function Page() {
       </Track>
 
       {/* ── Footer ── */}
-      <footer className="footer">
-        <span className="footer-left">
-          2026 Volodymyr Pivoshenko &lt;contact@pivoshenko.dev&gt;
-        </span>
-        <div className="footer-links">
-          <a
-            href="https://github.com/pivoshenko"
-            className="footer-icon"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="GitHub"
-          >
-            <FaGithub />
-          </a>
-          <a
-            href="https://linkedin.com/in/pivoshenko"
-            className="footer-icon"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn"
-          >
-            <FaLinkedinIn />
-          </a>
+      <footer className="site-footer">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <span className="footer-brand-name">KASETTO</span>
+            <p className="footer-tagline">
+              Declarative AI agent environment manager. Written in Rust.
+            </p>
+            <div className="footer-social">
+              <a
+                href="https://github.com/pivoshenko/kasetto"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+              >
+                <FaGithub />
+              </a>
+              <a
+                href="https://linkedin.com/in/pivoshenko"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                <FaLinkedinIn />
+              </a>
+            </div>
+          </div>
+
+          <div className="footer-col">
+            <h3 className="footer-col-title">Docs</h3>
+            <ul>
+              <li>
+                <a href="/docs">Quick start</a>
+              </li>
+              <li>
+                <a href="/docs/installation">Installation</a>
+              </li>
+              <li>
+                <a href="/docs/configuration">Configuration</a>
+              </li>
+              <li>
+                <a href="/docs/commands">Commands</a>
+              </li>
+              <li>
+                <a href="/docs/cookbook">Cookbook</a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h3 className="footer-col-title">Project</h3>
+            <ul>
+              <li>
+                <a
+                  href="https://github.com/pivoshenko/kasetto"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Repository
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/pivoshenko/kasetto/releases"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Releases
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/pivoshenko/kasetto/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Issues
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/pivoshenko/kasetto/blob/main/CONTRIBUTING.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Contributing
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h3 className="footer-col-title">More</h3>
+            <ul>
+              <li>
+                <a href="/docs/agents">Supported agents</a>
+              </li>
+              <li>
+                <a href="/docs/faq">FAQ</a>
+              </li>
+              <li>
+                <a href="/docs/security">Security</a>
+              </li>
+              <li>
+                <a href="/docs/ci">CI & automation</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <span>
+            © 2026 Volodymyr Pivoshenko{" "}
+            <a href="mailto:contact@pivoshenko.dev" className="footer-bottom-email">
+              &lt;contact@pivoshenko.dev&gt;
+            </a>
+          </span>
+          <span className="footer-bottom-meta">MIT • Apache 2.0</span>
         </div>
       </footer>
     </div>
