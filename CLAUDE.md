@@ -4,16 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Build & Test Commands
 
+`just check` runs format + lint + test + build for both the Rust crate and the Next.js site under `site/`. Per-target recipes are split:
+
 ```bash
-just check          # format + lint + test + build (full validation)
-just format         # cargo fmt
-just lint           # cargo clippy -- -D warnings
+just check          # full validation (rs + site)
+just format         # format-rs + format-site
+just lint           # lint-rs + lint-site
 just test           # cargo test
-just build          # cargo build --release
-cargo test <name>   # run a single test by name
+just build          # build-rs + build-site
+cargo test <name>   # run a single Rust test
+just serve-site     # local Next.js dev server
 ```
 
-The project forbids `unsafe` code and warns on `dbg!` and `todo!` (see `[lints]` in `Cargo.toml`).
+The Rust project forbids `unsafe` code and warns on `dbg!` and `todo!` (see `[lints]` in `Cargo.toml`).
 
 ## Architecture
 
@@ -37,6 +40,15 @@ CLI args → match cli.command
 - **`lock.rs`** - Manifest persistence: tracks installed skills + MCP assets, stores latest sync report as JSON blob
 - **`home/`** - Interactive welcome screen with `prompt.rs` for sync arg input
 - **`list/`** - Interactive TUI browser: `browse.rs` (event loop), `render.rs` (frame drawing), `session.rs` (state/guard), `tab.rs`, `types.rs`
+
+### Site (`site/`)
+
+Next.js 15 App Router project that hosts both the marketing landing (`/`) and the Fumadocs-powered documentation (`/docs/*`). Single Vercel project serves `kasetto.dev` and `docs.kasetto.dev` (legacy subdomain — host-gated 308 redirects in `next.config.mjs` rewrite `docs.kasetto.dev/<slug>` to `kasetto.dev/docs/<slug>`).
+
+- **`app/`** — App Router pages, shared `TopNav`, theme-less dark layout. `app/page.tsx` is the marketing homepage (tape-deck layout); `app/docs/[[...slug]]/page.tsx` renders MDX via Fumadocs.
+- **`content/docs/*.mdx`** — Documentation source. Order in `meta.json`. Mermaid blocks become live `<Mermaid>` JSX via the `remarkMermaid` plugin in `source.config.ts` (bypasses Shiki).
+- **`app/globals.css`** — Single source of design tokens in `:root`: palette (`--bg`/`--mauve`/`--rust`/...), type scale (`--fs-xs`..`--fs-2xl`), spacing (`--space-1`..`--space-18`), tracking, radius. Component styles reference tokens — no hardcoded color/font values outside the `:root` block. Fumadocs `--fd-*` tokens are bridged to the same palette in HSL.
+- Dark-only: there is no theme toggle; `RootProvider theme={{ enabled: false }}` and `<html className="dark" data-theme="dark">`.
 
 ### Sync Data Flow
 
