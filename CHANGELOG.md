@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.9.0] - 2026-05-10
+
+### Features
+
+- **cli**: Notify when a new version is released
+
 ## [2.8.1] - 2026-05-10
 
 ### Bug fixes
@@ -29,6 +35,10 @@ All notable changes to this project will be documented in this file.
 - **site**: Disable vercel auto-deploy on push to main
 - **ci**: Rename vercel project secret variable
 - **docs**: Remove mkdocs and finish migration to fumadocs
+
+### Release
+
+- V2.8.1
 
 ## [2.7.0] - 2026-05-09
 
