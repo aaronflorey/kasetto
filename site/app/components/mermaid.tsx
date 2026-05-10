@@ -53,9 +53,7 @@ export function Mermaid({ chart }: MermaidProps) {
 
   if (error) {
     return (
-      <pre className="text-sm text-red-500 whitespace-pre-wrap">
-        Mermaid render error: {error}
-      </pre>
+      <pre className="text-sm text-red-500 whitespace-pre-wrap">Mermaid render error: {error}</pre>
     );
   }
 

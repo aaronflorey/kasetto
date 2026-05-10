@@ -22,10 +22,8 @@ const remarkMermaid: Plugin<[], Root> = () => (tree) => {
           value: node.value,
         },
       ],
-      // biome-ignore lint/suspicious/noExplicitAny: mdast-util-mdx node shape
-      children: [] as any,
-      // biome-ignore lint/suspicious/noExplicitAny: same
-    } as any;
+      children: [] as never,
+    } as never;
   });
 };
 

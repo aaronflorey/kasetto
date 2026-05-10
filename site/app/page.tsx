@@ -89,10 +89,70 @@ export default async function Page() {
       </div>
 
       <div className="cassette-label">
-        <p className="hero-tagline">DECLARATIVE AI AGENT ENVIRONMENT MANAGER</p>
+        <h1 className="hero-headline">
+          Declarative <span className="hero-accent">AI agent</span> <br />
+          environment manager.
+        </h1>
         <p className="hero-etymology">
           <span className="hero-etymology-jp">カセット</span> — cassette. plug in, swap out, share.
         </p>
+        <div className="hero-cta">
+          <a href="/docs" className="btn btn-primary">
+            Read the docs <span aria-hidden>→</span>
+          </a>
+          <a
+            href="https://github.com/pivoshenko/kasetto"
+            className="btn btn-secondary"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub aria-hidden /> Star on GitHub
+          </a>
+        </div>
+
+        <figure className="hero-terminal" aria-label="Example kasetto sync output">
+          <div className="hero-terminal-bar">
+            <span className="hero-terminal-dot" />
+            <span className="hero-terminal-dot" />
+            <span className="hero-terminal-dot" />
+            <span className="hero-terminal-title">~/projects/my-app</span>
+          </div>
+          <div className="hero-terminal-body">
+            <div className="t-line">
+              <span className="t-prompt">$</span>
+              <span>kasetto sync</span>
+            </div>
+            <div className="t-rows">
+              <div className="t-row">
+                <span className="t-ok">✓</span>
+                <span>anthropics/skills</span>
+                <span className="t-dim">12 skills</span>
+              </div>
+              <div className="t-row">
+                <span className="t-ok">✓</span>
+                <span>pivoshenko/skill-pack</span>
+                <span className="t-dim">5 skills</span>
+              </div>
+              <div className="t-row">
+                <span className="t-ok">✓</span>
+                <span>mcps/github</span>
+                <span className="t-dim">1 server</span>
+              </div>
+              <div className="t-row">
+                <span className="t-ok">✓</span>
+                <span>mcps/obsidian</span>
+                <span className="t-dim">1 server</span>
+              </div>
+            </div>
+            <div className="t-divider" />
+            <div className="t-summary-line">
+              <span className="t-dim">synced</span>
+              <span className="t-summary">17 skills</span>
+              <span className="t-dim">·</span>
+              <span className="t-summary">2 mcps</span>
+            </div>
+          </div>
+        </figure>
       </div>
 
       {/* ─────── SIDE A ─────── */}
