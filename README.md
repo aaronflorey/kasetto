@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Kasetto logo" src="assets/logo.svg" width="450" />
+  <a href="https://www.kasetto.dev/"><img alt="Kasetto logo" src="assets/logo.svg" width="450" /></a>
 </p>
 
 <p align="center">
