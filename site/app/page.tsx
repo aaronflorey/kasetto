@@ -3,7 +3,6 @@ import { GoStar } from "react-icons/go";
 import { AgentsGrid } from "./components/agents-grid";
 import { CopyButton } from "./components/copy-button";
 import { ConfigExample, FeatureList } from "./components/feature-tabs";
-import { ThemeToggle } from "./components/theme-toggle";
 
 const INSTALL = [
   {
@@ -46,39 +45,68 @@ async function getRepoData(): Promise<{ stars: string | null; version: string | 
   }
 }
 
+function Track({
+  num,
+  title,
+  children,
+}: {
+  num: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  const side = num.charAt(0);
+  return (
+    <section className="track" data-side={side}>
+      <div className="track-marker">
+        <span className="track-num">{num}</span>
+        <span className="track-bar" />
+        <span className="track-title">{title}</span>
+      </div>
+      <div className="track-body">{children}</div>
+    </section>
+  );
+}
+
+function SideBanner({ side, label }: { side: "A" | "B"; label: string }) {
+  return (
+    <div className="tape-side" data-side={side}>
+      <span className="tape-side-tag">SIDE {side}</span>
+      <span className="tape-side-line" />
+      <span className="tape-side-label">{label}</span>
+    </div>
+  );
+}
+
 export default async function Page() {
   const { stars, version } = await getRepoData();
 
   return (
     <div className="page-wrap">
-      {/* ── Logo ── */}
+      {/* ── Cassette label ── */}
       <div className="logo-wrap">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="Kasetto" className="logo-img" />
       </div>
 
-      {/* ── Hero ── */}
-      <section className="section">
-        <div className="grid-box">
-          {/* Tagline */}
-          <div className="hero-row">
-            <p className="hero-tagline">DECLARATIVE AI AGENT ENVIRONMENT MANAGER</p>
-            <p className="hero-etymology">
-              <span className="hero-etymology-jp">カセット</span> — cassette. plug in, swap out,
-              share.
-            </p>
-          </div>
+      <div className="cassette-label">
+        <p className="hero-tagline">DECLARATIVE AI AGENT ENVIRONMENT MANAGER</p>
+        <p className="hero-etymology">
+          <span className="hero-etymology-jp">カセット</span> — cassette. plug in, swap out, share.
+        </p>
+      </div>
 
-          {/* GET STARTED */}
+      {/* ─────── SIDE A ─────── */}
+      <SideBanner side="A" label="GET STARTED · FEATURES · EXAMPLE" />
+
+      <Track num="A1" title="QUICKSTART">
+        <div className="grid-box">
           <div className="action-row">
-            <span className="action-label">GET STARTED</span>
+            <span className="action-label">INSTALL</span>
             <div className="install-right">
               <code className="install-cmd">curl -fsSL kasetto.dev/install | sh</code>
               <CopyButton text="curl -fsSL kasetto.dev/install | sh" />
             </div>
           </div>
-
-          {/* GitHub */}
           <div className="action-row">
             <span className="action-label">
               GITHUB
@@ -99,43 +127,31 @@ export default async function Page() {
               github.com/pivoshenko/kasetto <span className="arrow">↗</span>
             </a>
           </div>
-
-          {/* Docs */}
           <div className="action-row">
             <span className="action-label">DOCS</span>
-            <a
-              href="https://docs.kasetto.dev"
-              className="action-link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              docs.kasetto.dev <span className="arrow">↗</span>
+            <a href="/docs" className="action-link">
+              kasetto.dev/docs <span className="arrow">↗</span>
             </a>
           </div>
         </div>
-      </section>
+      </Track>
 
-      {/* ── Features ── */}
-      <section className="section">
-        <p className="section-label">FEATURES</p>
+      <Track num="A2" title="FEATURES">
         <FeatureList />
-      </section>
+      </Track>
 
-      {/* ── Supported Agents ── */}
-      <section className="section">
-        <p className="section-label">SUPPORTED AGENTS</p>
-        <AgentsGrid />
-      </section>
-
-      {/* ── Config ── */}
-      <section className="section">
-        <p className="section-label">EXAMPLE</p>
+      <Track num="A3" title="EXAMPLE">
         <ConfigExample />
-      </section>
+      </Track>
 
-      {/* ── Install ── */}
-      <section className="section">
-        <p className="section-label">INSTALL</p>
+      {/* ─────── SIDE B ─────── */}
+      <SideBanner side="B" label="AGENTS · INSTALL" />
+
+      <Track num="B1" title="SUPPORTED AGENTS">
+        <AgentsGrid />
+      </Track>
+
+      <Track num="B2" title="INSTALL">
         <div className="grid-box">
           {INSTALL.map((m) => (
             <div key={m.label} className="install-row">
@@ -147,7 +163,7 @@ export default async function Page() {
             </div>
           ))}
         </div>
-      </section>
+      </Track>
 
       {/* ── Footer ── */}
       <footer className="footer">
@@ -155,7 +171,6 @@ export default async function Page() {
           2026 Volodymyr Pivoshenko &lt;contact@pivoshenko.dev&gt;
         </span>
         <div className="footer-links">
-          <ThemeToggle />
           <a
             href="https://github.com/pivoshenko"
             className="footer-icon"

@@ -1,18 +1,18 @@
 format-rs:
   cargo fmt
 
-format-next:
-  cd landing && pnpm format
+format-site:
+  cd site && pnpm format
 
-format: format-rs format-next
+format: format-rs format-site
 
 lint-rs:
   cargo clippy -- -D warnings
 
-lint-next:
-  cd landing && pnpm lint
+lint-site:
+  cd site && pnpm lint
 
-lint: lint-rs lint-next
+lint: lint-rs lint-site
 
 test:
   cargo test
@@ -20,30 +20,21 @@ test:
 update-rs:
   cargo update
 
-update-next:
-  cd landing && pnpm update
+update-site:
+  cd site && pnpm update
 
-update-docs:
-  uv pip compile docs/requirements.txt -o docs/requirements.txt
-
-update: update-rs update-next
+update: update-rs update-site
 
 build-rs:
   cargo build --release
 
-build-next:
-  cd landing && pnpm build
+build-site:
+  cd site && pnpm build
 
-build-docs:
-  cd docs && mkdocs build -f mkdocs.yml
+build: build-rs build-site
 
-build: build-rs build-next
-
-serve-docs:
-  cd docs && mkdocs serve -f mkdocs.yml
-
-serve-landing:
-  cd landing && pnpm dev
+serve-site:
+  cd site && pnpm dev
 
 changelog:
   git-cliff --output CHANGELOG.md

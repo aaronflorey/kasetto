@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
+import { TopNav } from "./components/top-nav";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -28,16 +29,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={jetbrainsMono.className} suppressHydrationWarning>
-      <head>
-        <script
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional blocking theme script to prevent flash
-          dangerouslySetInnerHTML={{
-            __html: `(function(){var s=localStorage.getItem('theme');var t=s==='light'||s==='dark'?s:window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);})();`,
-          }}
-        />
-      </head>
-      <body>{children}</body>
+    <html lang="en" className={`${jetbrainsMono.className} dark`} data-theme="dark">
+      <body>
+        <TopNav />
+        {children}
+      </body>
     </html>
   );
 }

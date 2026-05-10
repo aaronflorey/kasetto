@@ -1,0 +1,18 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "installation",
+    "configuration",
+    "commands",
+    "agents",
+    "authentication",
+    "writing-skills",
+    "how-sync-works",
+    "sync-flow",
+    "cookbook",
+    "ci",
+    "security",
+    "faq"
+  ]
+}

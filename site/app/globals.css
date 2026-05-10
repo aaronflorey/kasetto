@@ -2,102 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Palette tokens (dark default) ─── */
+/* ─── Palette: neutral dark, warmth as accent only ─── */
 :root {
-  --base: #000000;
-  --mantle: #0c0a09;
-  --surface0: #1c1917;
-  --surface1: #292524;
-  --surface2: #44403c;
-  --overlay1: #78716c;
-  --subtext0: #a8a29e;
-  --subtext1: #d6d3d1;
-  --text: #e7e5e4;
+  /* Near-neutral dark with the faintest warm undertone */
+  --base: #0a0908;        /* page bg */
+  --mantle: #111110;      /* elevated surface (cards) */
+  --surface0: #181715;    /* hover/inset */
+  --surface1: #232220;    /* border default */
+  --surface2: #34322f;    /* border emphasized */
+  --overlay1: #7a7773;    /* subtle text */
+  --subtext0: #a8a5a0;    /* muted text */
+  --subtext1: #cfcbc4;    /* secondary text */
+  --text: #ebe8e2;        /* primary text — warm-neutral cream */
 
-  --mauve: #a78cc4;
-  --lavender: #9faece;
-  --sky: #7da2b5;
-  --green: #8ea98c;
-  --yellow: #c7b07a;
+  /* Restrained accents */
+  --mauve: #b89cdc;       /* Side A — soft violet */
+  --lavender: #a8a3d8;
+  --sky: #8aaab8;
+  --green: #9ab28a;
+  --yellow: #d4b070;      /* Side B — muted amber */
+  --rust: #d97757;        /* hero highlight */
+  --tape: #c4ad88;
 
   /* Semantic */
   --bg: var(--base);
+  --bg-elevated: var(--mantle);
   --border: var(--surface1);
+  --border-strong: var(--surface2);
   --fg: var(--text);
   --fg-muted: var(--subtext0);
   --fg-subtle: var(--overlay1);
-  --accent: var(--lavender);
+  --accent: var(--mauve);
+  --accent-cool: var(--lavender);
   --accent-warm: var(--yellow);
+  --accent-rust: var(--rust);
   --kst-purple: #c86bff;
-  --grid-color: rgba(255, 255, 255, 0.07);
+
+  --grid-color: rgba(255, 245, 230, 0.035);
   --grid-size: 96px;
-}
-
-/* ─── Light palette (shared by media query + explicit override) ─── */
-@media (prefers-color-scheme: light) {
-  :root {
-    --base: #e8e4df;
-    --mantle: #dedad4;
-    --surface0: #cbc6bf;
-    --surface1: #b8b3ac;
-    --surface2: #a09b94;
-    --overlay1: #7a7470;
-    --subtext0: #5e5955;
-    --subtext1: #47433f;
-    --text: #302d2a;
-
-    --mauve: #7c3aed;
-    --lavender: #5b6fd6;
-    --sky: #0284c7;
-    --green: #16a34a;
-    --yellow: #b45309;
-
-    --kst-purple: #7c3aed;
-    --grid-color: rgba(0, 0, 0, 0.07);
-  }
-}
-
-/* ─── Explicit theme overrides (beat media query via specificity) ─── */
-html[data-theme="light"] {
-  --base: #eff1f5;
-  --mantle: #e6e9ef;
-  --surface0: #ccd0da;
-  --surface1: #bcc0cc;
-  --surface2: #acb0be;
-  --overlay1: #8c8fa1;
-  --subtext0: #6c6f85;
-  --subtext1: #5c5f77;
-  --text: #4c4f69;
-
-  --mauve: #8839ef;
-  --lavender: #7287fd;
-  --sky: #04a5e5;
-  --green: #40a02b;
-  --yellow: #df8e1d;
-
-  --kst-purple: #8839ef;
-  --grid-color: rgba(0, 0, 0, 0.055);
-}
-
-html[data-theme="dark"] {
-  --base: #000000;
-  --mantle: #0c0a09;
-  --surface0: #1c1917;
-  --surface1: #292524;
-  --surface2: #44403c;
-  --overlay1: #78716c;
-  --subtext0: #a8a29e;
-  --subtext1: #d6d3d1;
-  --text: #e7e5e4;
-
-  --mauve: #a78cc4;
-  --lavender: #9faece;
-  --sky: #7da2b5;
-  --green: #8ea98c;
-  --yellow: #c7b07a;
-
-  --kst-purple: #c86bff;
-  --grid-color: rgba(255, 255, 255, 0.07);
 }
 
 /* ─── Reset ─── */
@@ -179,7 +121,10 @@ button {
 .grid-box {
   border: 1px solid var(--border);
   width: 100%;
-  background: var(--bg);
+  background: var(--bg-elevated);
+  box-shadow:
+    0 1px 0 rgba(255, 220, 170, 0.02) inset,
+    0 8px 24px -12px rgba(0, 0, 0, 0.6);
 }
 
 /* ─── Hero ─── */
@@ -670,4 +615,210 @@ button {
   .feat-cell:first-child {
     border-top: none !important;
   }
+}
+
+/* ─── Fumadocs theme bridge — warm dark only (HSL components) ─── */
+:root,
+html.dark,
+html[data-theme="dark"] {
+  --fd-background: 30 9% 4%;           /* #0a0908 */
+  --fd-foreground: 38 21% 90%;         /* #ebe8e2 */
+  --fd-card: 30 5% 7%;                 /* #111110 */
+  --fd-card-foreground: 38 21% 90%;
+  --fd-popover: 30 5% 7%;
+  --fd-popover-foreground: 38 21% 90%;
+  --fd-primary: 270 39% 74%;           /* mauve #b89cdc */
+  --fd-primary-foreground: 30 9% 4%;
+  --fd-secondary: 30 6% 11%;
+  --fd-secondary-foreground: 38 21% 90%;
+  --fd-muted: 30 6% 9%;
+  --fd-muted-foreground: 30 7% 64%;
+  --fd-accent: 36 53% 64%;             /* amber #d4b070 */
+  --fd-accent-foreground: 30 9% 4%;
+  --fd-border: 30 6% 13%;
+  --fd-ring: 270 39% 74%;
+}
+
+/* ─── Top nav (shared across landing + docs) ─── */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.top-nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.top-nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+  color: var(--fg);
+  transition: color 0.12s;
+}
+
+.top-nav-brand:hover {
+  color: var(--accent);
+}
+
+.top-nav-logo-img {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+.top-nav-name {
+  font-family: inherit;
+}
+
+.top-nav-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.top-nav-link {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--fg-muted);
+  transition: color 0.12s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-nav-link:hover {
+  color: var(--fg);
+}
+
+/* ─── Cassette label (under logo) ─── */
+.cassette-label {
+  text-align: center;
+  padding: 0 0 56px;
+}
+.cassette-label .hero-tagline {
+  font-size: 22px;
+  letter-spacing: 0.18em;
+}
+.cassette-label .hero-etymology {
+  margin-top: 8px;
+}
+
+/* ─── Tape side banner ─── */
+.tape-side {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 0 28px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.32em;
+}
+.tape-side-tag {
+  color: var(--accent);
+  padding: 6px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.tape-side[data-side="B"] .tape-side-tag {
+  color: var(--accent-warm);
+  border-color: var(--accent-warm);
+  background: color-mix(in srgb, var(--accent-warm) 8%, transparent);
+}
+.tape-side-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  position: relative;
+}
+.tape-side-line::before,
+.tape-side-line::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transform: translateY(-50%);
+}
+.tape-side-line::before { left: 24%; }
+.tape-side-line::after { right: 24%; }
+.tape-side-label {
+  color: var(--fg-subtle);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+}
+
+/* ─── Track row (left marker + content) ─── */
+.track {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 28px;
+  padding: 0 0 56px;
+}
+.track-marker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+.track-num {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--mauve);
+}
+.track-bar {
+  width: 28px;
+  height: 2px;
+  background: var(--mauve);
+  opacity: 0.6;
+}
+.track-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--fg-subtle);
+  line-height: 1.5;
+}
+.track-body {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .track {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding-bottom: 40px;
+  }
+  .track-marker {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    position: static;
+  }
+  .track-bar { width: 18px; }
+  .track-num { font-size: 16px; }
+  .cassette-label .hero-tagline { font-size: 16px; }
+  .tape-side { gap: 12px; padding: 12px 0 20px; font-size: 11px; letter-spacing: 0.24em; }
+  .tape-side-label { display: none; }
 }
