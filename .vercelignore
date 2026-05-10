@@ -1,6 +1,5 @@
 target
 debug
-site
 .git
 **/*.rs.bk
 *.pdb
